@@ -30,6 +30,7 @@ GPIO.output(LED, GPIO.LOW)
     #etc.
 
 try:
+    while 1:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind((TCP_IP, TCP_PORT))
         s.listen(1)
@@ -44,11 +45,15 @@ try:
                 GPIO.output(LED,GPIO.LOW)
                 send_data = '0'
                 conn.send(str(send_data))  # Send ACK to RPI1
+                GPIO.cleanup()
+                conn.close() # Close socket connection
             elif recv_data == '1': # If receive 1 turn LED ON
                 print "INSIDE '1' of ELIF"
                 GPIO.output(LED,GPIO.HIGH)
                 send_data = '0'
                 conn.send(str(send_data))  # Send ACK to RPI1
+                GPIO.cleanup()
+                conn.close() # Close socket connection
             elif recv_data == '2':           # This is just for now, will need to incorporate thread here; If receive 2 blink LED
                 # blinkLED()
                 print "INSIDE '2' of ELIF"
@@ -65,6 +70,8 @@ try:
                 GPIO.output(LED,GPIO.HIGH)
                 send_data = '0'
                 conn.send(str(send_data))  # Send ACK to RPI1
+                GPIO.cleanup()
+                conn.close() # Close socket connection
             # else :
                 # print "INSIDE ELSE"
                 # GPIO.output(LED,GPIO.HIGH)
@@ -77,4 +84,3 @@ try:
 except KeyboardInterrupt:
         GPIO.cleanup()
         conn.close() # Close socket connection
-pi@raspberrypi ~/Desktop/ECE4564/Project1 $
