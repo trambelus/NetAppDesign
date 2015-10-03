@@ -55,9 +55,9 @@ def process(command):
 	log("Attempting connection to %s on port %d" % (ip, port))
 	sock.connect((ip, port))
 	log("Connection successful")
-	sock.send(bytes(led_on))
-	resp = sock.recv(1)
-	log("Remote Pi responded with code %d" % resp)
+	sock.send(bytes(chr(led_on), 'UTF-8'))
+	resp = int.from_bytes(sock.recv(1), byteorder='little')
+	log("Remote Pi responded with code %d" %  resp)
 	return "Remote machine at %s:%d responded with code %d" % (ip, port, resp)
 
 def monitor():
