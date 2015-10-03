@@ -50,41 +50,43 @@ try:
 			is_active = [False] # It's a list because it'll get passed to the thread by reference this way, not by value.
 			# If we just passed False as an argument, changing the local variable here wouldn't change the thread's variable.
 			# There are many ways to implement this, but I like this list-singleton method. It's simple.
-			Thread(target=flash, args=(is_active,)).start() # start the thread
+			flashthread = Thread(target=flash, args=(is_active,))
+			flashthread.daemon = True
+			flashthread.start() # start the thread
 			# Setup GPIO as output
 			GPIO.setmode(GPIO.BOARD)
 			GPIO.setup(LED, GPIO.OUT)
 			conn, addr = s.accept()
 			print 'Connection address:', addr
-			recv_data = conn.recv(BUFFER_SIZE)
+			recv_data = ord(conn.recv(BUFFER_SIZE))
 			print "received data: ", recv_data
-			if recv_data == '0': # If receive 0 turn LED OFF
+			if recv_data == 0: # If receive 0 turn LED OFF
 				print "INSIDE '0' of IF"
 				is_active[0] = False # Turns the flashing off
 				GPIO.output(LED,GPIO.LOW)
-				send_data = '0'
-				conn.send(str(send_data))  # Send ACK to RPI1
+				send_data = 0
+				conn.send(chr(send_data))  # Send ACK to RPI1
 				GPIO.cleanup()
 				conn.close() # Close socket connection
-			elif recv_data == '1': # If receive 1 turn LED ON
+			elif recv_data == 1: # If receive 1 turn LED ON
 				print "INSIDE '1' of ELIF"
 				is_active[0] = False # Turns the flashing off
 				GPIO.output(LED,GPIO.HIGH)
-				send_data = '0'
-				conn.send(str(send_data))  # Send ACK to RPI1
+				send_data = 0
+				conn.send(chr(send_data))  # Send ACK to RPI1
 				GPIO.cleanup()
 				conn.close() # Close socket connection
-			elif recv_data == '2':           # This is just for now, will need to incorporate thread here; If receive 2 blink LED
+			elif recv_data == 2:           # This is just for now, will need to incorporate thread here; If receive 2 blink LED
 				print "INSIDE '2' of ELIF"
 				is_active[0] = True # Turns the flashing on
-				send_data = '0'
-				conn.send(str(send_data))  # Send ACK to RPI1
+				send_data = 0
+				conn.send(chr(send_data))  # Send ACK to RPI1
 				GPIO.cleanup()
 				conn.close() # Close socket connection
 			else:
 				# Something unexpected happened
-				print("Received unexpected data %s" % recv_data)
-				conn.send(str('1'))
+				print("Received unexpected data %d" % recv_data)
+				conn.send(chr(1))
 				GPIO.cleanup()
 				conn.close()
 
