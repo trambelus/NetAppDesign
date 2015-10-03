@@ -58,7 +58,7 @@ def process(command):
 	sock.send(bytes(chr(led_on), 'UTF-8'))
 	resp = int.from_bytes(sock.recv(1), byteorder='little')
 	log("Remote Pi responded with code %d" %  resp)
-	return "Remote machine at %s:%d responded with code %d" % (ip, port, resp)
+	return "ACK %s" % (command)
 
 def monitor():
 	"""
@@ -77,7 +77,9 @@ def monitor():
 			commands = re.search(VALID_PAT, mention.text)
 			if commands:
 				response = process(commands.group(0))
-				api.update_status("@%s %s" % (mention.user.screen_name, response))
+				status = "@%s %s" % (WATCHING, response)
+				log("Posting status %s (len=%d)" % (status, len(status)))
+				api.update_status(status=status)
 
 def main():
 	if len(sys.argv) == 1:

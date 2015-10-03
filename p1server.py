@@ -7,11 +7,11 @@ import socket
 import time
 from threading import Thread
 import RPi.GPIO as GPIO
+import sys
 
 # GPIO pin number of LED according to spec; GPIO pin 18 Phys Pin 12
 LED = 12
 
-TCP_IP = '172.30.144.131'
 # TCP_IP = '192.168.0.12'
 # TCP_IP = '0.0.0.0'
 TCP_PORT = 45678
@@ -41,7 +41,12 @@ def flash(is_active):
 
 		time.sleep(FLASH_DELAY)
 
-try:
+def main():
+	if len(sys.argv) == 1:
+		TCP_IP = '172.30.144.131'
+	else:
+		TCP_IP = sys.argv[1]
+	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.bind((TCP_IP, TCP_PORT))
 		s.listen(1)
@@ -90,7 +95,10 @@ try:
 				GPIO.cleanup()
 				conn.close()
 
-except KeyboardInterrupt:
-		is_active.remove(0) # Turns the flashing off
-		GPIO.cleanup()
-		conn.close() # Close socket connection
+	except KeyboardInterrupt:
+			is_active.remove(0) # Turns the flashing off
+			GPIO.cleanup()
+			conn.close() # Close socket connection
+
+if __name__ == '__main__':
+	main()
