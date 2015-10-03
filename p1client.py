@@ -100,6 +100,8 @@ def monitor():
 						log("Tweepy error: %s" % str(ex))
 		except tweepy.error.TweepError as ex:
 			# Too many requests, probably
+			if '429' in str(ex):
+				log("Too many requests; sleeping")
 			time.sleep(30)
 
 def main():
