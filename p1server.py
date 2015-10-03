@@ -2,7 +2,10 @@
 # Created by: Chris Cox
 # Project 1
 # ECE 4564
-# Credit goes to: SHAWNHYMEL
+# Credit goes to: SHAWNHYMEL URL: https://learn.sparkfun.com/tutorials/raspberry-pi-twitter-monitor
+# Credit goes to: Scott Mangold URL:  http://www.thirdeyevis.com/pi-page-2.php
+# Description: Created a server on the raspberrypiII that is connected to a breadboard via gpio pins
+# when a client connects it can light up a LED on the breadboard based on a tweet it receieved.
 import socket
 import time
 from threading import Thread
@@ -37,8 +40,6 @@ def flash(is_active):
 				GPIO.output(LED,GPIO.HIGH) # Turn on LED
 			else:
 				GPIO.output(LED,GPIO.LOW) # Turn off LED
-			print("Flash!") # so you can see what's going on here in this example
-
 		time.sleep(FLASH_DELAY)
 
 def main():
@@ -54,7 +55,6 @@ def main():
 		while 1:
 			is_active = [False] # It's a list because it'll get passed to the thread by reference this way, not by value.
 			# If we just passed False as an argument, changing the local variable here wouldn't change the thread's variable.
-			# There are many ways to implement this, but I like this list-singleton method. It's simple.
 			flashthread = Thread(target=flash, args=(is_active,))
 			flashthread.daemon = True
 			flashthread.start() # start the thread
@@ -66,7 +66,7 @@ def main():
 			recv_data = ord(conn.recv(BUFFER_SIZE))
 			print "received data: ", recv_data
 			if recv_data == 0: # If receive 0 turn LED OFF
-				print "INSIDE '0' of IF"
+				print "Received LEDOFF"
 				is_active[0] = False # Turns the flashing off
 				GPIO.output(LED,GPIO.LOW)
 				send_data = 0
@@ -74,15 +74,15 @@ def main():
 				GPIO.cleanup()
 				conn.close() # Close socket connection
 			elif recv_data == 1: # If receive 1 turn LED ON
-				print "INSIDE '1' of ELIF"
+				print "Received LEDON"
 				is_active[0] = False # Turns the flashing off
 				GPIO.output(LED,GPIO.HIGH)
 				send_data = 0
 				conn.send(chr(send_data))  # Send ACK to RPI1
 				GPIO.cleanup()
 				conn.close() # Close socket connection
-			elif recv_data == 2:           # This is just for now, will need to incorporate thread here; If receive 2 blink LED
-				print "INSIDE '2' of ELIF"
+			elif recv_data == 2:           # If receive two then
+				print "Received LEDFLASH"
 				is_active[0] = True # Turns the flashing on
 				send_data = 0
 				conn.send(chr(send_data))  # Send ACK to RPI1
