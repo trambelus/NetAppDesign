@@ -77,7 +77,7 @@ def monitor():
 			commands = re.search(VALID_PAT, mention.text)
 			if commands:
 				response = process(commands.group(0))
-				status = "@%s %s" % (WATCHING, response)
+				status = "@%s %s" % (mention.user.screen_name, response)
 				log("Posting status %s (len=%d)" % (status, len(status)))
 				# This update_status call doesn't work 100% of the time.
 				# Sometimes there are 403 or 429 responses.
