@@ -77,7 +77,7 @@ def monitor():
 
 	while True:
 		try:
-		mentions = api.mentions_timeline(count=1)
+			mentions = api.mentions_timeline(count=1)
 			for mention in mentions:
 				if mention.id in started:
 					time.sleep(5)
