@@ -76,8 +76,8 @@ def monitor():
 		started = [int(s.strip()) for s in f.readlines()]
 
 	while True:
-		mentions = api.mentions_timeline(count=1)
 		try:
+		mentions = api.mentions_timeline(count=1)
 			for mention in mentions:
 				if mention.id in started:
 					time.sleep(5)
