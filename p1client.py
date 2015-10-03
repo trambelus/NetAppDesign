@@ -70,32 +70,37 @@ def monitor():
 	auth = tweepy.OAuthHandler(cred[0], cred[1])
 	auth.set_access_token(cred[2], cred[3])
 	api = tweepy.API(auth)
+	log("Initialization successful")
 	# Monitor
 	with open(STARTEDFILE, 'r') as f:
 		started = [int(s.strip()) for s in f.readlines()]
 
 	while True:
 		mentions = api.mentions_timeline(count=1)
-		for mention in mentions:
-			if mention.id in started:
-				time.sleep(5)
-				continue
-			started.append(mention.id)
-			with open(STARTEDFILE, 'a') as f:
-				f.write('\n'+str(mention.id))
-			log("%s: %s" % (mention.text, mention.user.screen_name))
-			commands = re.search(VALID_PAT, mention.text)
-			if commands:
-				response = process(commands.group(0))
-				status = "@%s %s" % (mention.user.screen_name, response)
-				log("Posting status %s (len=%d)" % (status, len(status)))
-				# This update_status call doesn't work 100% of the time.
-				# Sometimes there are 403 or 429 responses.
-				# Tweepy isn't the most robust library; nothing to be done for it.
-				try:
-					api.update_status(status=status)
-				except tweepy.error.TweepError as ex:
-					log("Tweepy error: %s" % str(ex))
+		try:
+			for mention in mentions:
+				if mention.id in started:
+					time.sleep(5)
+					continue
+				started.append(mention.id)
+				with open(STARTEDFILE, 'a') as f:
+					f.write('\n'+str(mention.id))
+				log("%s: %s" % (mention.text, mention.user.screen_name))
+				commands = re.search(VALID_PAT, mention.text)
+				if commands:
+					response = process(commands.group(0))
+					status = "@%s %s" % (mention.user.screen_name, response)
+					log("Posting status %s (len=%d)" % (status, len(status)))
+					# This update_status call doesn't work 100% of the time.
+					# Sometimes there are 403 or 429 responses.
+					# Tweepy isn't the most robust library; nothing to be done for it.
+					try:
+						api.update_status(status=status)
+					except tweepy.error.TweepError as ex:
+						log("Tweepy error: %s" % str(ex))
+		except tweepy.error.TweepError as ex:
+			# Too many requests, probably
+			sleep(30)
 
 def main():
 	if len(sys.argv) == 1:
