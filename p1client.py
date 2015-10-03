@@ -79,7 +79,13 @@ def monitor():
 				response = process(commands.group(0))
 				status = "@%s %s" % (WATCHING, response)
 				log("Posting status %s (len=%d)" % (status, len(status)))
-				api.update_status(status=status)
+				# This update_status call doesn't work 100% of the time.
+				# Sometimes there are 403 or 429 responses.
+				# Tweepy isn't the most robust library; nothing to be done for it.
+				try:
+					api.update_status(status=status)
+				except tweepy.error.TweepError as ex:
+					log("Tweepy error: %s" % str(ex))
 
 def main():
 	if len(sys.argv) == 1:
