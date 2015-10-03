@@ -72,14 +72,17 @@ def monitor():
 	api = tweepy.API(auth)
 	# Monitor
 	with open(STARTEDFILE, 'r') as f:
-		started = [s.strip() for s in f.readlines()]
+		started = [int(s.strip()) for s in f.readlines()]
 
 	while True:
 		mentions = api.mentions_timeline(count=1)
 		for mention in mentions:
+			if mention.id in started:
+				time.sleep(5)
+				continue
 			started.append(mention.id)
 			with open(STARTEDFILE, 'a') as f:
-				f.write('\n'+mention.id)
+				f.write('\n'+str(mention.id))
 			log("%s: %s" % (mention.text, mention.user.screen_name))
 			commands = re.search(VALID_PAT, mention.text)
 			if commands:
