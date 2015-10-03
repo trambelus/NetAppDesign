@@ -1,3 +1,7 @@
+#!/usr/bin/env python3.4
+# Client for Project 1, ECE 4564
+# Author: John McDouall
+
 import socket
 import tweepy
 import sys
@@ -23,15 +27,22 @@ def log(*msg):
 	with open(LOGFILE, 'a') as f:
 		f.write(output + '\n')
 
-# Get key, secret, token, and token secret from external file
-# (Not gonna hardwire them here)
+
 def get_credentials():
+	"""
+	Get key, secret, token, and token secret from external file
+	"""
+	# (Not gonna hardwire them here)
 	with open(OAUTHFILE,'r') as f:
 		stuff = f.readlines()
 		ret = [i.rstrip() for i in next(x[1:] for x in [t.split('\t') for t in stuff] if x[0] == USERNAME)]
 		return ret
 
 def process(command):
+	"""
+	Given a command in hashtag format (string), send the appropriate command
+	to remote Pi and generate confirmation message.
+	"""
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	ip_port = re.search(IP_PAT, command).group(0)
 	ip = ip_port[:ip_port.rfind("_")].replace('_','.')[1:]
@@ -46,11 +57,13 @@ def process(command):
 	log("Connection successful")
 	sock.send(bytes(led_on))
 	resp = sock.recv(1)
-	if resp != 0:
-		log("Remote Pi returned error code %d" % resp)
-	return
+	log("Remote Pi responded with code %d" % resp)
+	return "Remote machine at %s:%d responded with code %d" % (ip, port, resp)
 
-def main():
+def monitor():
+	"""
+	Initializes tweepy; loops through and parses username mentions; calls process(); posts responses
+	"""
 	# Initialize
 	cred = get_credentials()
 	auth = tweepy.OAuthHandler(cred[0], cred[1])
@@ -63,8 +76,12 @@ def main():
 			log("%s: %s" % (mention.text, mention.user.screen_name))
 			commands = re.search(VALID_PAT, mention.text)
 			if commands:
-				process(commands.group(0))
+				response = process(commands.group(0))
+				api.update_status("@%s %s" % (mention.user.screen_name, response))
+
+def main():
+	if len(sys.argv) == 1:
+		monitor()
 
 if __name__ == '__main__':
-	#process("#172.30.42.72_LED03_ON")
 	main()

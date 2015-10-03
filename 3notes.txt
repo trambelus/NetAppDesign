@@ -1,0 +1,29 @@
+Running project in Python 3:
+
+Note: Python 3.2 is preinstalled on the Pi, but `pip install tweepy` installs a version that isn't backward-compatible, and looks like it was meant for 3.4. Rather than find an old version of tweepy (a small library with little support), I decided to upgrade to Python 3.4 on my Pi.
+
+`sudo apt-get install python3 --upgrade` did nothing: the Raspbian repo had 3.2 as its latest version. Manual installation was in order.
+
+First step was FTP download:
+	$ wget https://www.python.org/ftp/python/3.4.3/Python-3.4.3.tgz
+and building/installation:
+	$ cd Python-3.4.3
+	$ ./configure
+	$ make
+	$ sudo make install
+
+And then I needed to install pip for this version of Python.
+	$ wget https://bootstrap.pypa.io/get-pip.py
+	$ sudo python3.4 get-pip.py
+
+Failure. No SSL support had been detected on the build, so Python compiled without HTTPS support.
+
+So:
+	$ sudo apt-get install libssl-dev
+Failure. Packages were out of date.
+	$ sudo apt-get update
+	$ sudo apt-get install libssl-dev
+
+And then the configure/make/install steps were repeated.
+
+Success.
