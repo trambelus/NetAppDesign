@@ -30,6 +30,7 @@ def flash(is_active):
 	while True:
 		c = 1-c
 		if len(is_active) == 0: # empty list means exit, for our purposes
+            GPIO.output(LED,GPIO.LOW) # Turn off LED
 			break # jump out of this infinite while loop and exit this thread
 		if is_active[0]:
 			if c:
@@ -91,6 +92,6 @@ try:
                 # send_data = '1'
                 # conn.send(str(send_data))  # Send ACK to RPI1
 except KeyboardInterrupt:
-        is_active[0] = Falsh # Turns the flashing off
+        is_active.remove(0) # Turns the flashing off
         GPIO.cleanup()
         conn.close() # Close socket connection
