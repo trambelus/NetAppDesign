@@ -10,6 +10,7 @@ import time
 
 USERNAME = 'Trambelus'
 OAUTHFILE = 'oauth.txt'
+STARTEDFILE = 'started.txt'
 WATCHING = 'VTNetApps'
 PORT = 45678
 
@@ -70,9 +71,15 @@ def monitor():
 	auth.set_access_token(cred[2], cred[3])
 	api = tweepy.API(auth)
 	# Monitor
+	with open(STARTEDFILE, 'r') as f:
+		started = [s.strip() for s in f.readlines()]
+
 	while True:
 		mentions = api.mentions_timeline(count=1)
 		for mention in mentions:
+			started.append(mention.id)
+			with open(STARTEDFILE, 'a') as f:
+				f.write('\n'+mention.id)
 			log("%s: %s" % (mention.text, mention.user.screen_name))
 			commands = re.search(VALID_PAT, mention.text)
 			if commands:
