@@ -11,8 +11,8 @@ import RPi.GPIO as GPIO
 # GPIO pin number of LED according to spec; GPIO pin 18 Phys Pin 12
 LED = 12
 
-# TCP_IP = '172.30.147.125'
-TCP_IP = '192.168.0.12'
+TCP_IP = '172.30.144.131'
+# TCP_IP = '192.168.0.12'
 # TCP_IP = '0.0.0.0'
 TCP_PORT = 45678
 BUFFER_SIZE = 2  # Normally 1024, but we want fast response
