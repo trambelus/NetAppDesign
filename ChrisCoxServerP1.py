@@ -5,8 +5,7 @@
 # Credit goes to: SHAWNHYMEL
 import socket
 import time
-import thread
-import threading
+from threading import Thread
 import RPi.GPIO as GPIO
 
 # GPIO pin number of LED according to spec; GPIO pin 18 Phys Pin 12
