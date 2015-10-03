@@ -15,7 +15,7 @@ TCP_IP = '172.30.144.131'
 # TCP_IP = '192.168.0.12'
 # TCP_IP = '0.0.0.0'
 TCP_PORT = 45678
-BUFFER_SIZE = 2  # Normally 1024, but we want fast response
+BUFFER_SIZE = 1
 
 # Setup GPIO as output
 GPIO.setmode(GPIO.BOARD)
@@ -60,7 +60,7 @@ try:
 			print "received data: ", recv_data
 			if recv_data == '0': # If receive 0 turn LED OFF
 				print "INSIDE '0' of IF"
-				is_active[0] = Falsh # Turns the flashing off
+				is_active[0] = False # Turns the flashing off
 				GPIO.output(LED,GPIO.LOW)
 				send_data = '0'
 				conn.send(str(send_data))  # Send ACK to RPI1
@@ -68,29 +68,26 @@ try:
 				conn.close() # Close socket connection
 			elif recv_data == '1': # If receive 1 turn LED ON
 				print "INSIDE '1' of ELIF"
-				is_active[0] = Falsh # Turns the flashing off
+				is_active[0] = False # Turns the flashing off
 				GPIO.output(LED,GPIO.HIGH)
 				send_data = '0'
 				conn.send(str(send_data))  # Send ACK to RPI1
 				GPIO.cleanup()
 				conn.close() # Close socket connection
 			elif recv_data == '2':           # This is just for now, will need to incorporate thread here; If receive 2 blink LED
-				# blinkLED()
 				print "INSIDE '2' of ELIF"
 				is_active[0] = True # Turns the flashing on
 				send_data = '0'
 				conn.send(str(send_data))  # Send ACK to RPI1
 				GPIO.cleanup()
 				conn.close() # Close socket connection
-			# else :
-				# print "INSIDE ELSE"
-				# GPIO.output(LED,GPIO.HIGH)
-				# time.sleep(0.5)
-				# GPIO.output(LED,GPIO.LOW)
-				# time.sleep(0.5)
-				# GPIO.output(LED,GPIO.HIGH)
-				# send_data = '1'
-				# conn.send(str(send_data))  # Send ACK to RPI1
+			else:
+				# Something unexpected happened
+				print("Received unexpected data %s" % recv_data)
+				conn.send(str('1'))
+				GPIO.cleanup()
+				conn.close()
+
 except KeyboardInterrupt:
 		is_active.remove(0) # Turns the flashing off
 		GPIO.cleanup()
