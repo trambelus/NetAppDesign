@@ -9,7 +9,9 @@ import re
 import time
 
 USERNAME = 'Trambelus'
+#USERNAME = 'CcoxDev'
 OAUTHFILE = 'oauth.txt'
+#OAUTHFILE = 'oauthCcoxDev.txt'
 STARTEDFILE = 'started.txt'
 WATCHING = 'VTNetApps'
 PORT = 45678
@@ -72,11 +74,14 @@ def monitor():
 	api = tweepy.API(auth)
 	log("Initialization successful")
 	# Monitor
+	open(STARTEDFILE, 'a').close()
 	with open(STARTEDFILE, 'r') as f:
 		started = [int(s.strip()) for s in f.readlines()]
 
 	while True:
 		try:
+			time.sleep(10)
+			log("Getting timeline mentions")
 			mentions = api.mentions_timeline(count=1)
 			for mention in mentions:
 				if mention.id in started:
@@ -89,7 +94,7 @@ def monitor():
 				commands = re.search(VALID_PAT, mention.text)
 				if commands:
 					response = process(commands.group(0))
-					status = "@%s %s" % (mention.user.screen_name, response)
+					status = "@%s %s" % (WATCHING, response) # status = "@%s %s" % (mention.user.screen_name, response)
 					log("Posting status %s (len=%d)" % (status, len(status)))
 					# This update_status call doesn't work 100% of the time.
 					# Sometimes there are 403 or 429 responses.
