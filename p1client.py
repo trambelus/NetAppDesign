@@ -12,6 +12,13 @@ USERNAME = 'Trambelus'
 #USERNAME = 'CcoxDev'
 OAUTHFILE = 'oauth.txt'
 #OAUTHFILE = 'oauthCcoxDev.txt'
+"""
+oauth.txt syntax:
+To add support for a Twitter dev account, add a line in the file oauth.txt
+(or whatever OAUTHFILE is defined as) in this format:
+[username][tab][app key][tab][app secret][tab][access token][tab][token secret]
+Also change USERNAME above to match whatever you want to look for in that file.
+"""
 STARTEDFILE = 'started.txt'
 WATCHING = 'VTNetApps'
 PORT = 45678
