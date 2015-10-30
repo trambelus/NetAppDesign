@@ -5,6 +5,7 @@
 # Description: Created a server on the raspberrypiII that is connected to a breadboard via gpio pins
 # when a client connects it can light up LEDs on the breadboard based on the message it receives through RabbitMQ.
 # Commented out code is from example code.  I left it so i can follow what is happening in the examples.
+# I should return a status of good or bad
 import shelve
 import time
 import pybonjour
@@ -29,6 +30,7 @@ LED15 = 15 # Physical pin = 15. GPIO pin = 22
 LED16 = 16 # Physical pin = 16. GPIO pin = 23
 
 # Setup GPIO as output
+#included with your kits, these are marked 17, 18, 27, and 22. Change the GPIO accordingly
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(LED12, GPIO.OUT)
 GPIO.output(LED12, GPIO.LOW)
@@ -42,6 +44,35 @@ GPIO.output(LED15, GPIO.LOW)
 GPIO.setup(LED16, GPIO.OUT)
 GPIO.output(LED16, GPIO.LOW)
 
+# This is the function for the push request
+def push():
+	#	Store in Shelve, sends reply that it pushed pebble
+	find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age'])
+	#	When store is executed then update count
+	# Update LEDs
+	count++
+	binary_led(count)
+
+# This is the function for the pull request
+def pull():
+	#	Remove message from Shelve send it to pebble pi.
+	find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age'])
+	#	When store is executed then update count
+	# Update LEDs
+	count--
+	binary_led(count)
+
+# This is the function for the pullr request
+def pullr():
+	#	Copy message from Shelve send it to pebble pi.
+	find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age'])
+	#	When store is executed then update count
+	# Update LEDs
+	count = count
+	binary_led(count)
+
+
+
 # This function will perform age comparisons
 def age_match(pattern,age):
 	if pattern[0] == '>':
@@ -54,7 +85,9 @@ def age_match(pattern,age):
 def find_matches(Qm,Qs,Qa):
 	ret = []
 	for entry in data:
-		if re.search(Qm,entry['message']) and re.search(Qs,entry['subject']) and age_match(Qa,entry['age']):
+		#if re.search(id,entry['MsgID'])
+		#	status = "Duplicate"
+		if re.search(Qm,entry['Message']) and re.search(Qs,entry['Subject']) and age_match(Qa,entry['Age']):
 			ret.append(entry)
 	return ret;
 
@@ -96,25 +129,13 @@ body = parsed_incoming_pebble # trying to make the body the json pebble im expec
 parsed_incoming_pebble = json.loads(incoming_pebble)
 if parsed_incoming_pebble['Action'] == 'push':
 # For Push
-#	Store in Shelve, sends reply that it pushed pebble
-#	When store is executed then update count
-# Update LEDs
-count++
-binary_led(count)
+push()
 elif parsed_incoming_pebble['Action'] == 'pullr':
 # For Pullr
-#	Copy message from Shelve send it to pebble pi.
-#	When store is executed then update count
-# Update LEDs
-count = count
-binary_led(count)
+pullr()
 elif parsed_incoming_pebble['Action'] == 'pull':
 # For Pull
-#	Remove message from Shelve send it to pebble pi.
-#	When store is executed then update count
-# Update LEDs
-count--
-binary_led(count)
+pull()
 else
 #Throw error because we didnt receive a correct action
 
