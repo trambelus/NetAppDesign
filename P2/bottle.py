@@ -21,14 +21,6 @@ channel = connection.channel()
 
 channel.queue_declare(queue='bottle_queue')
 
-# def fib(n):
-#     if n == 0:
-#         return 0
-#     elif n == 1:
-#         return 1
-#     else:
-#         return fib(n-1) + fib(n-2)
-
 # GPIO pin number of LED according to spec; GPIO pin 18 Phys Pin 12
 LED12 = 12 # Physical pin = 12. GPIO pin = 18
 LED13 = 13 # Physical pin = 13. GPIO pin = 27
