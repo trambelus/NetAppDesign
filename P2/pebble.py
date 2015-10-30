@@ -13,8 +13,10 @@ import zeroconf
 
 LOGFILE = 'pebble.log'
 SERVER_Q = 'bottle_q'
+
 AUTHOR_DEFAULT = 'John'
 AGE_DEFAULT = 20
+TEAM
 
 def log(*msg, additional='', console_only=False):
 	"""
@@ -26,23 +28,40 @@ def log(*msg, additional='', console_only=False):
 		with open(LOGFILE, 'a') as f:
 			f.write(output + '\n')
 
-def create_request(subject, message):
-	pass
-
 def send(json_msg):
 	conn = pika.BlockingConnection(pika.ConnectionParameters(host=HOST))
 	channel = conn.channel()
 	channel.queue_declare(queue=SERVER_Q)
 	channel.basic_publish(exchange='', routing_key=SERVER_Q, body=json_msg)
 
-def push(msg):
-	pass
+def msgid():
+	return TEAM + str(int(time.mktime(time.gmtime())))
 
-def pull():
-	pass
+def push(args):
+	json_msg = """
+		{
+			"Action": "push",
+			"Author": "{0}",
+			"Age": "{1}",
+			"MsgID": "{2}",
+			"Subject": "{3}",
+			"Message": "{4}" 
+		}
+	""".format(args.author, args.age, msgid(), args.subject, args.message))
+	send(json_msg)
 
-def pullr():
-	pass
+# Handles pull and pullr
+def pull(args):
+	json_msg = """
+		{
+			"Action": "{0}",
+			"Message": "{1}",
+			"Subject": "{2}",
+			"Age": "{3}"
+		}
+	""".format(args.action, args.messageQ, args.subjectQ, args.ageQ)
+	send(json_msg)
+	
 
 def process_args(argv):
 	# Setup and parse
@@ -75,6 +94,10 @@ def main():
 	args = process_args(sys.argv[1:])
 	log("Valid")
 	print(args)
+	if args.action == "push":
+		push(args)
+	if args.action == "pull" or args.action == "pullr":
+		pull(args)
 
 if __name__ == '__main__':
 	main()
