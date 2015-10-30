@@ -32,6 +32,7 @@ def send(json_msg, channel):
 	channel.basic_publish(exchange='', routing_key=SERVER_Q, body=json_msg)
 
 def msgid():
+	# MsgID format: TeamXX_epochtime
 	return TEAM + '_' + str(int(time.mktime(time.gmtime())))
 
 def push(args, channel):
@@ -69,7 +70,7 @@ def process_args(argv):
 	parser.add_argument('-Qs', dest='subjectQ', nargs='+', help='Subject to request (regex)')
 	parser.add_argument('-Qa', dest='ageQ')
 	parser.add_argument('--age', type=int, required=False, default=AGE_DEFAULT, help='Age of author to send')
-	parser.add_argument('--author', type=string, required=False, default=AUTHOR_DEFAULT, help='Author name to send')
+	parser.add_argument('--author', required=False, default=AUTHOR_DEFAULT, help='Author name to send')
 	parser.add_argument('--host', default=HOST, help='Hostname of the RabbitMQ server to connect to')
 	args = parser.parse_args(argv)
 	# Validate and join
