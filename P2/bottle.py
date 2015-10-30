@@ -13,6 +13,7 @@ import sys
 import pika
 import json
 import time
+import re
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(
         host='localhost'))
@@ -41,7 +42,22 @@ GPIO.output(LED15, GPIO.LOW)
 GPIO.setup(LED16, GPIO.OUT)
 GPIO.output(LED16, GPIO.LOW)
 
-FLASH_DELAY = 1 # flash delay in seconds
+# This function will perform age comparisons
+def age_match(pattern,age):
+	if pattern[0] == '>':
+		return int(age) > int(pattern[1:])
+	if pattern[0] == '<':
+		return int(age) < int(pattern[1:])
+	return int(age) == int(pattern)
+
+# This function will find all of the matching pebbles
+def find_matches(Qm,Qs,Qa):
+	ret = []
+	for entry in data:
+		if re.search(Qm,entry['message']) and re.search(Qs,entry['subject']) and age_match(Qa,entry['age']):
+			ret.append(entry)
+	return ret;
+
 
 # This function will control the value outputted on the LEDS.
 def binary_led(count):
@@ -73,7 +89,7 @@ channel.start_consuming()
 		# print type(pebble)
 		# print pebble
 		# pebble_json = json.dumps(pebble)
-initializing count variable to display count of messages on LEDS
+#initializing count variable to display count of messages on LEDS
 count = 0
 # Message from rabbitMQ = incoming_pebble
 body = parsed_incoming_pebble # trying to make the body the json pebble im expecting to receive
