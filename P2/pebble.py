@@ -44,6 +44,8 @@ def process_args(argv):
 	if args.action == 'push':
 		if not (args.subject and args.message):
 			parser.error("the following arguments are required for push: -s, -m")
+		args.subject = ' '.join(args.subject)
+		args.message = ' '.join(args.message)
 	if args.action == 'pull' or args.action == 'pullr':
 		if not (args.messageQ or args.subjectQ or args.ageQ):
 			parser.error("one of the following arguments is required for %s: -Qm, -Qs, Qa" % args.action)
@@ -52,7 +54,8 @@ def process_args(argv):
 		
 def main():
 	args = process_args(sys.argv[1:])
-	log("Success")
+	log("Valid")
+	print(args)
 
 if __name__ == '__main__':
 	main()
