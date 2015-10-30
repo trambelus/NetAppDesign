@@ -16,6 +16,7 @@ SERVER_Q = 'bottle_q'
 
 AUTHOR_DEFAULT = 'John'
 AGE_DEFAULT = 20
+HOST = 'localhost'
 TEAM = 'Team25'
 
 def log(*msg, additional='', console_only=False):
