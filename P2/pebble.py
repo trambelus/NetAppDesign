@@ -47,7 +47,7 @@ def push(args):
 			"Subject": "{3}",
 			"Message": "{4}" 
 		}
-	""".format(args.author, args.age, msgid(), args.subject, args.message))
+	""".format(args.author, args.age, msgid(), args.subject, args.message)
 	send(json_msg)
 
 # Handles pull and pullr
