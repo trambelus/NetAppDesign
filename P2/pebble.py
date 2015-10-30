@@ -16,7 +16,7 @@ SERVER_Q = 'bottle_q'
 
 AUTHOR_DEFAULT = 'John'
 AGE_DEFAULT = 20
-TEAM
+TEAM = 'Team25'
 
 def log(*msg, additional='', console_only=False):
 	"""
@@ -28,16 +28,13 @@ def log(*msg, additional='', console_only=False):
 		with open(LOGFILE, 'a') as f:
 			f.write(output + '\n')
 
-def send(json_msg):
-	conn = pika.BlockingConnection(pika.ConnectionParameters(host=HOST))
-	channel = conn.channel()
-	channel.queue_declare(queue=SERVER_Q)
+def send(json_msg, channel):
 	channel.basic_publish(exchange='', routing_key=SERVER_Q, body=json_msg)
 
 def msgid():
-	return TEAM + str(int(time.mktime(time.gmtime())))
+	return TEAM + '_' + str(int(time.mktime(time.gmtime())))
 
-def push(args):
+def push(args, channel):
 	json_msg = """
 		{
 			"Action": "push",
@@ -48,10 +45,10 @@ def push(args):
 			"Message": "{4}" 
 		}
 	""".format(args.author, args.age, msgid(), args.subject, args.message)
-	send(json_msg)
+	send(json_msg, channel)
 
 # Handles pull and pullr
-def pull(args):
+def pull(args, channel):
 	json_msg = """
 		{
 			"Action": "{0}",
@@ -60,8 +57,7 @@ def pull(args):
 			"Age": "{3}"
 		}
 	""".format(args.action, args.messageQ, args.subjectQ, args.ageQ)
-	send(json_msg)
-	
+	send(json_msg, channel)
 
 def process_args(argv):
 	# Setup and parse
@@ -89,15 +85,22 @@ def process_args(argv):
 			args.subjectQ = ' '.join(args.subjectQ)
 	return args
 
+def setup_conn():
+	conn = pika.BlockingConnection(pika.ConnectionParameters(host=HOST))
+	channel = conn.channel()
+	channel.queue_declare(queue=SERVER_Q)
+	return (conn, channel)
 		
 def main():
 	args = process_args(sys.argv[1:])
 	log("Valid")
 	print(args)
+	(conn, channel) = setup_conn()
 	if args.action == "push":
-		push(args)
+		push(args, channel)
 	if args.action == "pull" or args.action == "pullr":
-		pull(args)
+		pull(args, channel)
+	print(d)
 
 if __name__ == '__main__':
 	main()
