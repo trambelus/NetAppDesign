@@ -24,25 +24,28 @@ channel = connection.channel()
 channel.queue_declare(queue='bottle_queue')
 
 # GPIO pin number of LED according to spec; GPIO pin 18 Phys Pin 12
+
 LED12 = 12 # Physical pin = 12. GPIO pin = 18
 LED13 = 13 # Physical pin = 13. GPIO pin = 27
 LED15 = 15 # Physical pin = 15. GPIO pin = 22
 LED16 = 16 # Physical pin = 16. GPIO pin = 23
 
+LEDs = [12, 13, 15, 16]
+
 # Setup GPIO as output
 #included with your kits, these are marked 17, 18, 27, and 22. Change the GPIO accordingly
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(LED12, GPIO.OUT)
-GPIO.output(LED12, GPIO.LOW)
+GPIO.setup(LEDs[0], GPIO.OUT)
+GPIO.output(LEDs[0], GPIO.LOW)
 
-GPIO.setup(LED13, GPIO.OUT)
-GPIO.output(LED13, GPIO.LOW)
+GPIO.setup(LEDs[1], GPIO.OUT)
+GPIO.output(LEDs[1], GPIO.LOW)
 
-GPIO.setup(LED15, GPIO.OUT)
-GPIO.output(LED15, GPIO.LOW)
+GPIO.setup(LEDs[2], GPIO.OUT)
+GPIO.output(LEDs[2], GPIO.LOW)
 
-GPIO.setup(LED16, GPIO.OUT)
-GPIO.output(LED16, GPIO.LOW)
+GPIO.setup(LEDs[3], GPIO.OUT)
+GPIO.output(LEDs[3], GPIO.LOW)
 
 # This is the function for the push request
 def push():
@@ -50,8 +53,8 @@ def push():
 	find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age'])
 	#	When store is executed then update count
 	# Update LEDs
-	count++
-	binary_led(count)
+	message_count += 1
+	turn_on_led(message_count)
 
 # This is the function for the pull request
 def pull():
@@ -59,8 +62,8 @@ def pull():
 	find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age'])
 	#	When store is executed then update count
 	# Update LEDs
-	count--
-	binary_led(count)
+	message_count -= 1
+	turn_on_led(message_count)
 
 # This is the function for the pullr request
 def pullr():
@@ -68,9 +71,18 @@ def pullr():
 	find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age'])
 	#	When store is executed then update count
 	# Update LEDs
-	count = count
-	binary_led(count)
+	message_count = message_count
+	turn_on_led(message_count)
 
+# This function will control the value outputted on the LEDS.
+def turn_on_led(message_count):
+	for i in range(4):
+		if message_count & 2**i:
+			#turn on LED
+			GPIO.output(LEDs[i],GPIO.HIGH) # Turn on LED
+		else:
+			#turn off LED
+			GPIO.output(LEDs[i],GPIO.LOW) # Turn off LED
 
 
 # This function will perform age comparisons
@@ -90,23 +102,6 @@ def find_matches(Qm,Qs,Qa):
 		if re.search(Qm,entry['Message']) and re.search(Qs,entry['Subject']) and age_match(Qa,entry['Age']):
 			ret.append(entry)
 	return ret;
-
-
-# This function will control the value outputted on the LEDS.
-def binary_led(count):
-	if count = 
-	# c = 0
-	# while True:
-	# 	c = 1-c
-	# 	if len(is_active) == 0: # empty list means exit, for our purposes
-	# 		GPIO.output(LED,GPIO.LOW) # Turn off LED
-	# 		break # jump out of this infinite while loop and exit this thread
-	# 	if is_active[0]:
-	# 		if c:
-	# 			GPIO.output(LED,GPIO.HIGH) # Turn on LED
-	# 		else:
-	# 			GPIO.output(LED,GPIO.LOW) # Turn off LED
-	# 	time.sleep(FLASH_DELAY)
 
 
 print ' [*] Waiting for messages. To exit press CTRL+C'
