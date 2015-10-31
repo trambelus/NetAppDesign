@@ -20,13 +20,6 @@ import re
 status_success = {'Status':'success'};
 status_failed = {'Status':'failed'};
 
-connection = pika.BlockingConnection(pika.ConnectionParameters(
-        host='localhost'))
-
-channel = connection.channel()
-
-channel.queue_declare(queue='bottle_queue')
-
 # GPIO pin number of LED according to spec; GPIO pin 18 Phys Pin 12
 
 # LED11 = 11 # Physical pin = 11. GPIO pin = 17
@@ -63,7 +56,7 @@ def push():
 # This is the function for the pull request
 def pull():
 	#	Remove message from Shelve send it to pebble pi.
-	find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age'])
+	channel.basic_publish(exchange='', routing_key='bottle_queue', body=find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age']))
 	#	When store is executed then update count
 	# Update LEDs
 	message_count -= 1
@@ -72,7 +65,7 @@ def pull():
 # This is the function for the pullr request
 def pullr():
 	#	Copy message from Shelve send it to pebble pi.
-	find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age'])
+	channel.basic_publish(exchange='', routing_key='bottle_queue', body=find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age']))
 	#	When store is executed then update count
 	# Update LEDs
 	message_count = message_count
@@ -107,34 +100,30 @@ def find_matches(Qm,Qs,Qa):
 			ret.append(entry)
 	return ret;
 
+# This is the callback that performs the actions of the bottle
+def callback(ch, method, properties, parsed_incoming_pebble):
+	# Message from rabbitMQ = incoming_pebble
+	parsed_incoming_pebble = json.loads(incoming_pebble)
+	if parsed_incoming_pebble['Action'] == 'push':
+		# For Push
+		push()
+	elif parsed_incoming_pebble['Action'] == 'pullr':
+		# For Pullr
+		pullr()
+	elif parsed_incoming_pebble['Action'] == 'pull':
+		# For Pull
+		pull()
 
-print ' [*] Waiting for messages. To exit press CTRL+C'
-def callback(ch, method, properties, body):    
-	print " [x] Received %r" % (body,)
-channel.basic_consume(callback, queue='bottle_queue',no_ack=True)
-channel.start_consuming()
+def main():
+	#initializing count variable to display count of messages on LEDS
+	message_count = 0
+	connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+	channel = connection.channel()
 
-# Advertise using ZeroConf
-		# Build JSON message
-		# epoch_seconds = time.mktime(time.localtime())
-		# pebble = {'Action':'push','Author':'tom swift','Age':'21','MsgID':'Team08_'+str(epoch_seconds),'Subject':'weather','Message':'It is foggy at the moment'}
-		# print type(pebble)
-		# print pebble
-		# pebble_json = json.dumps(pebble)
-#initializing count variable to display count of messages on LEDS
-count = 0
-# Message from rabbitMQ = incoming_pebble
-body = parsed_incoming_pebble # trying to make the body the json pebble im expecting to receive
-parsed_incoming_pebble = json.loads(incoming_pebble)
-if parsed_incoming_pebble['Action'] == 'push':
-# For Push
-push()
-elif parsed_incoming_pebble['Action'] == 'pullr':
-# For Pullr
-pullr()
-elif parsed_incoming_pebble['Action'] == 'pull':
-# For Pull
-pull()
-else
-#Throw error because we didnt receive a correct action
+	channel.queue_declare(queue='bottle_queue')
 
+	channel.basic_consume(callback, queue='bottle_queue',no_ack=True)
+	channel.start_consuming()
+
+if __name__ == '__main__':
+	main()
