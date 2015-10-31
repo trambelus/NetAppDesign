@@ -24,7 +24,7 @@ shelf = shelve.open(shelf_data)
 
 #initializing count variable to display count of messages on LEDS
 message_count = 0
-connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+connection = pika.BlockingConnection(pika.ConnectionParameters(host='172.30.147.126'))
 channel = connection.channel()
 
 channel.queue_declare(queue='bottle_queue')
