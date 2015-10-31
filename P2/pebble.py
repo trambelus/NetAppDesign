@@ -19,8 +19,10 @@ AUTHOR_DEFAULT = 'John'
 AGE_DEFAULT = 20
 TEAM = 'Team25'
 
-verbose = False
 host = 'localhost'
+username = 'john'
+password = '12345'
+verbose = False
 
 def log(*msg, additional='', console_only=False):
 	"""
@@ -93,10 +95,12 @@ def process_args(argv):
 	parser.add_argument('-Qm', dest='messageQ', nargs='+', help='Message to request (regex)')
 	parser.add_argument('-Qs', dest='subjectQ', nargs='+', help='Subject to request (regex)')
 	parser.add_argument('-Qa', dest='ageQ')
-	parser.add_argument('--age', type=int, required=False, default=AGE_DEFAULT, help='Age of author to send')
-	parser.add_argument('--author', required=False, default=AUTHOR_DEFAULT, help='Author name to send')
+	parser.add_argument('--age', type=int, default=AGE_DEFAULT, help='Age of author to send')
+	parser.add_argument('--author', default=AUTHOR_DEFAULT, help='Author name to send')
 	parser.add_argument('--host', help='Hostname of the RabbitMQ server to connect to')
 	parser.add_argument('--verbose', action='store_true', help='Verbose mode: print more stuff')
+	parser.add_argument('--username', help='Username to use when connecting to RabbitMQ server')
+	parser.add_argument('--password', help='Password to use when connecting to RabbitMQ server')
 	args = parser.parse_args(argv)
 	# Validate and join
 	if args.action == 'push':
@@ -110,17 +114,20 @@ def process_args(argv):
 		if args.subjectQ:
 			args.subjectQ = ' '.join(args.subjectQ)
 	if args.verbose:
-		global verbose
-		verbose = True
+		global verbose; verbose = True
 	if args.host:
-		global host
-		host = args.host
+		global host; host = args.host
+	if args.username:
+		global username; username = args.username
+	if args.password:
+		global password; password = args.password
+
 	return args
 
 def setup_conn():
 	logv("Host: %s" % host)
 	conn = pika.BlockingConnection(pika.ConnectionParameters(host=host,
-		virtual_host='/', credentials=pika.PlainCredentials(username='john', password='12345')))
+		virtual_host='/', credentials=pika.PlainCredentials(username=username, password=password)))
 	channel = conn.channel()
 	channel.queue_declare(queue=SERVER_Q)
 	return (conn, channel)
