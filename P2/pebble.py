@@ -61,6 +61,7 @@ def push(args, channel):
 	""".format(args.author, args.age, msgid(), args.subject, args.message)
 	logv("Sending JSON: \n%s" % json_msg)
 	send(json_msg, channel)
+	logv("Sent")
 
 # Handles pull and pullr
 def pull(args, channel):
@@ -147,6 +148,7 @@ def main():
 		push(args, channel)
 	if args.action == "pull" or args.action == "pullr":
 		pull(args, channel)
+	logv("Finished")
 
 if __name__ == '__main__':
 	main()
