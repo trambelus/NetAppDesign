@@ -8,7 +8,6 @@
 # I should return a status of good or bad
 import shelve
 import time
-import pybonjour
 import RPi.GPIO as GPIO
 import sys
 import pika
