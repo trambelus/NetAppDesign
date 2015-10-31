@@ -113,6 +113,9 @@ def process_args(argv):
 	if args.verbose:
 		global verbose
 		verbose = True
+	if args.host:
+		global HOST
+		HOST = args.host
 	return args
 
 def setup_conn():
