@@ -13,7 +13,7 @@ import zeroconf
 
 LOGFILE = 'pebble.log'
 DBFILE = 'pebble.db'
-SERVER_Q = 'bottle_q'
+SERVER_Q = 'bottle_queue'
 
 AUTHOR_DEFAULT = 'John'
 AGE_DEFAULT = 20
