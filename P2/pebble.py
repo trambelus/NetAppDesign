@@ -12,22 +12,30 @@ import time
 import zeroconf
 
 LOGFILE = 'pebble.log'
+DBFILE = 'pebble.db'
 SERVER_Q = 'bottle_q'
 
 AUTHOR_DEFAULT = 'John'
 AGE_DEFAULT = 20
+
 HOST = 'localhost'
 TEAM = 'Team25'
+
+verbose = False
 
 def log(*msg, additional='', console_only=False):
 	"""
 	Prepends a timestamp and prints a message to the console and LOGFILE
 	"""
-	output = "%s:\t%s" % (time.strftime("%Y-%m-%d %X"), ' '.join(msg))
+	output = "%s:\t%s" % (time.strftime("%Y-%m-%d %X"), ' '.join([str(s) for s in msg]))
 	print(output + additional)
 	if not console_only:
 		with open(LOGFILE, 'a') as f:
 			f.write(output + '\n')
+
+def logv(*msg, additional='', console_only=False):
+	if verbose:
+		log(*msg, additional, console_only)
 
 def send(json_msg, channel):
 	channel.basic_publish(exchange='', routing_key=SERVER_Q, body=json_msg)
@@ -47,6 +55,7 @@ def push(args, channel):
 			"Message": "{4}" 
 		}
 	""".format(args.author, args.age, msgid(), args.subject, args.message)
+	logv("Sending JSON: \n%s" % json_msg)
 	send(json_msg, channel)
 
 # Handles pull and pullr
@@ -59,7 +68,22 @@ def pull(args, channel):
 			"Age": "{3}"
 		}
 	""".format(args.action, args.messageQ, args.subjectQ, args.ageQ)
+	logv("Sending JSON: \n%s" % json_msg)
 	send(json_msg, channel)
+	def cb(channel, message, properties, body):
+		log("Response: ", channel, message, properties, body)
+		body = json.loads(body)
+		channel.stop_consuming()
+		shelf = shelve.open(DBFILE)
+		shelf[body['MsgID']] = body
+		logv("Syncing and closing shelf")
+		shelf.sync()
+		shelf.close()
+
+	channel.basic_consume(cb, queue=SERVER_Q, no_ack=True)
+	logv("Waiting for response...")
+	channel.start_consuming()
+
 
 def process_args(argv):
 	# Setup and parse
@@ -73,6 +97,7 @@ def process_args(argv):
 	parser.add_argument('--age', type=int, required=False, default=AGE_DEFAULT, help='Age of author to send')
 	parser.add_argument('--author', required=False, default=AUTHOR_DEFAULT, help='Author name to send')
 	parser.add_argument('--host', default=HOST, help='Hostname of the RabbitMQ server to connect to')
+	parser.add_argument('--verbose', action='store_true', help='Verbose mode: print more stuff')
 	args = parser.parse_args(argv)
 	# Validate and join
 	if args.action == 'push':
@@ -85,18 +110,22 @@ def process_args(argv):
 			args.messageQ = ' '.join(args.messageQ)
 		if args.subjectQ:
 			args.subjectQ = ' '.join(args.subjectQ)
+	if args.verbose:
+		verbose = True
 	return args
 
 def setup_conn():
 	conn = pika.BlockingConnection(pika.ConnectionParameters(host=HOST))
+	logv("Host: %s" % HOST)
 	channel = conn.channel()
 	channel.queue_declare(queue=SERVER_Q)
 	return (conn, channel)
 		
 def main():
 	args = process_args(sys.argv[1:])
-	log("Valid")
-	print(args)
+	logv("Valid")
+	logv(args)
+	logv("Setting up connection")
 	(conn, channel) = setup_conn()
 	if args.action == "push":
 		push(args, channel)
