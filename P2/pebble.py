@@ -75,13 +75,11 @@ def pull(args, channel):
 
 	def cb(channel, message, properties, body):
 		log("Response: ", channel, message, properties, body)
-		# JSON string to dict
-		body = json.loads(body)
 		# Stop the infinite loop on the channel
 		channel.stop_consuming()
 		# Shelve all this
 		shelf = shelve.open(DBFILE)
-		shelf[body['MsgID']] = json.dumps(body)
+		shelf[body['MsgID']] = body
 		logv("Syncing and closing shelf")
 		shelf.sync()
 		shelf.close()
