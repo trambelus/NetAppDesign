@@ -48,14 +48,14 @@ def msgid():
 def push(args, channel):
 	logv(args.author, args.age, msgid(), args.subject, args.message)
 	json_msg = """
-		{
+		{{
 			"Action": "push",
 			"Author": "{0}",
 			"Age": "{1}",
 			"MsgID": "{2}",
 			"Subject": "{3}",
 			"Message": "{4}" 
-		}
+		}}
 	""".format(args.author, args.age, msgid(), args.subject, args.message)
 	logv("Sending JSON: \n%s" % json_msg)
 	send(json_msg, channel)
@@ -63,12 +63,12 @@ def push(args, channel):
 # Handles pull and pullr
 def pull(args, channel):
 	json_msg = """
-		{
+		{{
 			"Action": "{0}",
 			"Message": "{1}",
 			"Subject": "{2}",
 			"Age": "{3}"
-		}
+		}}
 	""".format(args.action, args.messageQ, args.subjectQ, args.ageQ)
 	logv("Sending JSON: \n%s" % json_msg)
 	send(json_msg, channel)
