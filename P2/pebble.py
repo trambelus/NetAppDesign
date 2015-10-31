@@ -120,7 +120,7 @@ def process_args(argv):
 def setup_conn():
 	logv("Host: %s" % host)
 	conn = pika.BlockingConnection(pika.ConnectionParameters(host=host,
-		vhost='/', credentials=pika.PlainCredentials(username='john', password='12345')))
+		virtual_host='/', credentials=pika.PlainCredentials(username='john', password='12345')))
 	channel = conn.channel()
 	channel.queue_declare(queue=SERVER_Q)
 	return (conn, channel)
@@ -135,7 +135,6 @@ def main():
 		push(args, channel)
 	if args.action == "pull" or args.action == "pullr":
 		pull(args, channel)
-	print(d)
 
 if __name__ == '__main__':
 	main()
