@@ -24,19 +24,21 @@ username = 'john'
 password = '12345'
 verbose = False
 
-def log(*msg, additional='', console_only=False):
+def log(*msg):
 	"""
 	Prepends a timestamp and prints a message to the console and LOGFILE
 	"""
 	output = "%s:\t%s" % (time.strftime("%Y-%m-%d %X"), ' '.join([str(s) for s in msg]))
-	print(output + additional)
-	if not console_only:
-		with open(LOGFILE, 'a') as f:
-			f.write(output + '\n')
+	print(output)
+	with open(LOGFILE, 'a') as f:
+		f.write(output + '\n')
 
-def logv(*msg, additional='', console_only=False):
+def logv(*msg):
+	"""
+	Exactly the same as log(), if verbose=True. Otherwise does nothing.
+	"""
 	if verbose:
-		log(*msg, additional=additional, console_only=console_only)
+		log(*msg)
 
 def send(json_msg, channel):
 	channel.basic_publish(exchange='', routing_key=SERVER_Q, body=json_msg)
