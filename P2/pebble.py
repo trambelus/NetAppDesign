@@ -111,6 +111,7 @@ def process_args(argv):
 		if args.subjectQ:
 			args.subjectQ = ' '.join(args.subjectQ)
 	if args.verbose:
+		global verbose
 		verbose = True
 	return args
 
