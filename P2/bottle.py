@@ -120,7 +120,7 @@ def find_matches(Qm,Qs,Qa):
 	ret = []
 	for key in shelf_data:
 		entry = json.loads(shelf_bottle[key])
-		if re.search(id,entry['MsgID']) # Look into this
+		if re.search(id,entry['MsgID']): # Look into this
 			ret = status_failed # Look into this
 		else:
 			if re.search(Qm,entry['Message']) and re.search(Qs,entry['Subject']) and age_match(Qa,entry['Age']):
