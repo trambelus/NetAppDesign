@@ -17,8 +17,9 @@ import time
 import re
 
 
-status_success = {'Status':'success'};
-status_failed = {'Status':'failed'};
+shelf_data = 'bottle'
+status_success = {'Status':'success'}
+status_failed = {'Status':'failed'}
 
 # GPIO pin number of LED according to spec; GPIO pin 18 Phys Pin 12
 
@@ -45,27 +46,33 @@ GPIO.setup(LEDs[3], GPIO.OUT)
 GPIO.output(LEDs[3], GPIO.LOW)
 
 # This is the function for the push request
-def push():
+def push(parsed_incoming_pebble):
 	#	Store in Shelve, sends reply that it pushed pebble
-	find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age'])
+	push_pebble = find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age'])
 	#	When store is executed then update count
+	if push_pebble == 'status_failed':
+		channel.basic_publish(exchange='', routing_key='bottle_queue', body=json.dumps(status_failed))
+	else:
+		channel.basic_publish(exchange='', routing_key='bottle_queue', body=json.dumps(status_success))
 	# Update LEDs
 	message_count += 1
 	turn_on_led(message_count)
 
 # This is the function for the pull request
-def pull():
+def pull(parsed_incoming_pebble):
+	pull_pebble = find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age'])
 	#	Remove message from Shelve send it to pebble pi.
-	channel.basic_publish(exchange='', routing_key='bottle_queue', body=find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age']))
+	channel.basic_publish(exchange='', routing_key='bottle_queue', body=json.dumps(pull_pebble))
 	#	When store is executed then update count
 	# Update LEDs
 	message_count -= 1
 	turn_on_led(message_count)
 
 # This is the function for the pullr request
-def pullr():
+def pullr(parsed_incoming_pebble):
+	pullr_pebble = find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age'])
 	#	Copy message from Shelve send it to pebble pi.
-	channel.basic_publish(exchange='', routing_key='bottle_queue', body=find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age']))
+	channel.basic_publish(exchange='', routing_key='bottle_queue', body=json.dumps(pullr_pebble))
 	#	When store is executed then update count
 	# Update LEDs
 	message_count = message_count
@@ -93,11 +100,13 @@ def age_match(pattern,age):
 # This function will find all of the matching pebbles
 def find_matches(Qm,Qs,Qa):
 	ret = []
-	for entry in data:
-		#if re.search(id,entry['MsgID'])
-		#	status = "Duplicate"
-		if re.search(Qm,entry['Message']) and re.search(Qs,entry['Subject']) and age_match(Qa,entry['Age']):
-			ret.append(entry)
+	for key in shelf_data:
+		entry = json.loads(shelf_bottle[key])
+		if re.search(id,entry['MsgID']) # Look into this
+			ret = status_failed # Look into this
+		else:
+			if re.search(Qm,entry['Message']) and re.search(Qs,entry['Subject']) and age_match(Qa,entry['Age']):
+				ret.append(entry)
 	return ret;
 
 # This is the callback that performs the actions of the bottle
@@ -106,13 +115,13 @@ def callback(ch, method, properties, parsed_incoming_pebble):
 	parsed_incoming_pebble = json.loads(incoming_pebble)
 	if parsed_incoming_pebble['Action'] == 'push':
 		# For Push
-		push()
+		push(parsed_incoming_pebble)
 	elif parsed_incoming_pebble['Action'] == 'pullr':
 		# For Pullr
-		pullr()
+		pullr(parsed_incoming_pebble)
 	elif parsed_incoming_pebble['Action'] == 'pull':
 		# For Pull
-		pull()
+		pull(parsed_incoming_pebble)
 
 def main():
 	#initializing count variable to display count of messages on LEDS
