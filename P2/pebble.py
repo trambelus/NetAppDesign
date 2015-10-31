@@ -12,7 +12,7 @@ import time
 import zeroconf
 
 LOGFILE = 'pebble.log'
-DBFILE = 'pebble.db'
+DBFILE = 'pebble'
 SERVER_Q = 'bottle_queue'
 
 AUTHOR_DEFAULT = 'John'
@@ -81,7 +81,7 @@ def pull(args, channel):
 		channel.stop_consuming()
 		# Shelve all this
 		shelf = shelve.open(DBFILE)
-		shelf[body['MsgID']] = body
+		shelf[body['MsgID']] = json.dumps(body)
 		logv("Syncing and closing shelf")
 		shelf.sync()
 		shelf.close()
