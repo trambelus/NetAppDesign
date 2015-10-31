@@ -140,19 +140,19 @@ def callback(ch, method, properties, incoming_pebble):
 	parsed_incoming_pebble = json.loads(incoming_pebble)
 	if parsed_incoming_pebble['Action'] == 'push':
 		# For Push
-		shelf[body['MsgID']] = json.dumps(parsed_incoming_pebble)
+		shelf[parsed_incoming_pebble['MsgID']] = json.dumps(parsed_incoming_pebble)
 		log("Syncing and closing shelf")
 		push(parsed_incoming_pebble)
 		shelf.sync()
 	elif parsed_incoming_pebble['Action'] == 'pullr':
 		# For Pullr
-		shelf[body['MsgID']] = json.dumps(parsed_incoming_pebble)
+		shelf[parsed_incoming_pebble['MsgID']] = json.dumps(parsed_incoming_pebble)
 		logv("Syncing and closing shelf")
 		pullr(parsed_incoming_pebble)
 		shelf.sync()
 	elif parsed_incoming_pebble['Action'] == 'pull':
 		# For Pull
-		shelf[body['MsgID']] = json.dumps(parsed_incoming_pebble)
+		shelf[parsed_incoming_pebble['MsgID']] = json.dumps(parsed_incoming_pebble)
 		logv("Syncing and closing shelf")
 		pull(parsed_incoming_pebble)
 		shelf.sync()
