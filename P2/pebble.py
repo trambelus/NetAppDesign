@@ -46,6 +46,7 @@ def msgid():
 	return TEAM + '_' + str(int(time.mktime(time.gmtime())))
 
 def push(args, channel):
+	logv(args.author, args.age, msgid(), args.subject, args.message)
 	json_msg = """
 		{
 			"Action": "push",
@@ -71,10 +72,14 @@ def pull(args, channel):
 	""".format(args.action, args.messageQ, args.subjectQ, args.ageQ)
 	logv("Sending JSON: \n%s" % json_msg)
 	send(json_msg, channel)
+
 	def cb(channel, message, properties, body):
 		log("Response: ", channel, message, properties, body)
+		# JSON string to dict
 		body = json.loads(body)
+		# Stop the infinite loop on the channel
 		channel.stop_consuming()
+		# Shelve all this
 		shelf = shelve.open(DBFILE)
 		shelf[body['MsgID']] = body
 		logv("Syncing and closing shelf")
