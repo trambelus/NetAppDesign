@@ -35,7 +35,7 @@ def log(*msg, additional='', console_only=False):
 
 def logv(*msg, additional='', console_only=False):
 	if verbose:
-		log(*msg, additional, console_only)
+		log(*msg, additional=additional, console_only=console_only)
 
 def send(json_msg, channel):
 	channel.basic_publish(exchange='', routing_key=SERVER_Q, body=json_msg)
