@@ -16,6 +16,10 @@ import json
 import time
 import re
 
+
+status_success = {'Status':'success'};
+status_failed = {'Status':'failed'};
+
 connection = pika.BlockingConnection(pika.ConnectionParameters(
         host='localhost'))
 
@@ -25,12 +29,12 @@ channel.queue_declare(queue='bottle_queue')
 
 # GPIO pin number of LED according to spec; GPIO pin 18 Phys Pin 12
 
-LED12 = 12 # Physical pin = 12. GPIO pin = 18
-LED13 = 13 # Physical pin = 13. GPIO pin = 27
-LED15 = 15 # Physical pin = 15. GPIO pin = 22
-LED16 = 16 # Physical pin = 16. GPIO pin = 23
+# LED11 = 11 # Physical pin = 11. GPIO pin = 17
+# LED12 = 12 # Physical pin = 12. GPIO pin = 18
+# LED13 = 13 # Physical pin = 13. GPIO pin = 27
+# LED15 = 15 # Physical pin = 15. GPIO pin = 22
 
-LEDs = [12, 13, 15, 16]
+LEDs = [11, 12, 13, 15]
 
 # Setup GPIO as output
 #included with your kits, these are marked 17, 18, 27, and 22. Change the GPIO accordingly
