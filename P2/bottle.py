@@ -135,7 +135,7 @@ def find_matches(Qm,Qs,Qa):
 	return ret;
 
 # This is the callback that performs the actions of the bottle
-def callback(ch, method, properties, parsed_incoming_pebble):
+def callback(ch, method, properties, incoming_pebble):
 	# Message from rabbitMQ = incoming_pebble
 	parsed_incoming_pebble = json.loads(incoming_pebble)
 	if parsed_incoming_pebble['Action'] == 'push':
