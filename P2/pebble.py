@@ -116,8 +116,8 @@ def process_args(argv):
 	return args
 
 def setup_conn():
-	conn = pika.BlockingConnection(pika.ConnectionParameters(host=HOST))
 	logv("Host: %s" % HOST)
+	conn = pika.BlockingConnection(pika.ConnectionParameters(host=HOST))
 	channel = conn.channel()
 	channel.queue_declare(queue=SERVER_Q)
 	return (conn, channel)
