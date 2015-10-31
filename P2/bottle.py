@@ -22,6 +22,14 @@ status_failed = {'Status':'failed'}
 
 shelf = shelve.open(shelf_data)
 
+#initializing count variable to display count of messages on LEDS
+message_count = 0
+connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+channel = connection.channel()
+
+channel.queue_declare(queue='bottle_queue')
+
+
 # GPIO pin number of LED according to spec; GPIO pin 18 Phys Pin 12
 
 # LED11 = 11 # Physical pin = 11. GPIO pin = 17
@@ -150,13 +158,6 @@ def callback(ch, method, properties, parsed_incoming_pebble):
 		shelf.sync()
 
 def main():
-	#initializing count variable to display count of messages on LEDS
-	message_count = 0
-	connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
-	channel = connection.channel()
-
-	channel.queue_declare(queue='bottle_queue')
-
 	channel.basic_consume(callback, queue='bottle_queue',no_ack=True)
 	channel.start_consuming()
 
