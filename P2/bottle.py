@@ -21,6 +21,8 @@ shelf_data = 'bottle'
 status_success = {'Status':'success'}
 status_failed = {'Status':'failed'}
 
+shelf = shelve.open(shelf_data)
+
 # GPIO pin number of LED according to spec; GPIO pin 18 Phys Pin 12
 
 # LED11 = 11 # Physical pin = 11. GPIO pin = 17
@@ -44,6 +46,20 @@ GPIO.output(LEDs[2], GPIO.LOW)
 
 GPIO.setup(LEDs[3], GPIO.OUT)
 GPIO.output(LEDs[3], GPIO.LOW)
+
+def log(*msg, additional='', console_only=False):
+	"""
+	Prepends a timestamp and prints a message to the console and LOGFILE
+	"""
+	output = "%s:\t%s" % (time.strftime("%Y-%m-%d %X"), ' '.join([str(s) for s in msg]))
+	print(output + additional)
+	if not console_only:
+		with open(LOGFILE, 'a') as f:
+			f.write(output + '\n')
+
+def logv(*msg, additional='', console_only=False):
+	if verbose:
+		log(*msg, additional=additional, console_only=console_only)
 
 # This is the function for the push request
 def push(parsed_incoming_pebble):
@@ -115,13 +131,22 @@ def callback(ch, method, properties, parsed_incoming_pebble):
 	parsed_incoming_pebble = json.loads(incoming_pebble)
 	if parsed_incoming_pebble['Action'] == 'push':
 		# For Push
+		shelf[body['MsgID']] = json.dumps(body)
+		log("Syncing and closing shelf")
 		push(parsed_incoming_pebble)
+		shelf.sync()
 	elif parsed_incoming_pebble['Action'] == 'pullr':
 		# For Pullr
+		shelf[body['MsgID']] = json.dumps(body)
+		logv("Syncing and closing shelf")
 		pullr(parsed_incoming_pebble)
+		shelf.sync()
 	elif parsed_incoming_pebble['Action'] == 'pull':
 		# For Pull
+		shelf[body['MsgID']] = json.dumps(body)
+		logv("Syncing and closing shelf")
 		pull(parsed_incoming_pebble)
+		shelf.sync()
 
 def main():
 	#initializing count variable to display count of messages on LEDS
