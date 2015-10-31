@@ -17,11 +17,10 @@ SERVER_Q = 'bottle_q'
 
 AUTHOR_DEFAULT = 'John'
 AGE_DEFAULT = 20
-
-HOST = 'localhost'
 TEAM = 'Team25'
 
 verbose = False
+host = 'localhost'
 
 def log(*msg, additional='', console_only=False):
 	"""
@@ -96,7 +95,7 @@ def process_args(argv):
 	parser.add_argument('-Qa', dest='ageQ')
 	parser.add_argument('--age', type=int, required=False, default=AGE_DEFAULT, help='Age of author to send')
 	parser.add_argument('--author', required=False, default=AUTHOR_DEFAULT, help='Author name to send')
-	parser.add_argument('--host', default=HOST, help='Hostname of the RabbitMQ server to connect to')
+	parser.add_argument('--host', help='Hostname of the RabbitMQ server to connect to')
 	parser.add_argument('--verbose', action='store_true', help='Verbose mode: print more stuff')
 	args = parser.parse_args(argv)
 	# Validate and join
@@ -114,13 +113,13 @@ def process_args(argv):
 		global verbose
 		verbose = True
 	if args.host:
-		global HOST
-		HOST = args.host
+		global host
+		host = args.host
 	return args
 
 def setup_conn():
-	logv("Host: %s" % HOST)
-	conn = pika.BlockingConnection(pika.ConnectionParameters(host=HOST))
+	logv("Host: %s" % host)
+	conn = pika.BlockingConnection(pika.ConnectionParameters(host=host))
 	channel = conn.channel()
 	channel.queue_declare(queue=SERVER_Q)
 	return (conn, channel)
