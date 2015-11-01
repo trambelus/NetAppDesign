@@ -160,7 +160,7 @@ def setup_conn():
 		except pika.exceptions.ConnectionClosed:
 			logv("Could not connect to host %s, vhost %s, retrying in %d sec" % (host, '/', timeout))
 			time.sleep(int(timeout))
-			timeout = timeout * 1.5
+			timeout = timeout * 1.61803399
 
 	# Finally connected
 	channel = conn.channel()
