@@ -13,7 +13,7 @@ import zeroconf
 
 LOGFILE = 'pebble.log'
 DBFILE = 'pebble'
-SERVER_Q = 'bottle_queue'
+BOTTLE_Q = 'bottle_queue'
 
 AUTHOR_DEFAULT = 'John'
 AGE_DEFAULT = 20
@@ -41,7 +41,7 @@ def logv(*msg):
 		log(*msg)
 
 def send(json_msg, channel):
-	channel.basic_publish(exchange='', routing_key=SERVER_Q, body=json_msg)
+	channel.basic_publish(exchange='', routing_key=BOTTLE_Q, body=json_msg)
 
 def msgid():
 	# MsgID format: TeamXX_epochtime
@@ -63,12 +63,12 @@ def push(args, channel):
 	send(json_msg, channel)
 
 	def cb(channel, message, properties, body):
-		log("Response received: ", channel, message, properties, body)
+		log("Response received: ", body)
 		# Stop the infinite loop on the channel
 		channel.stop_consuming()
 
 	logv("Waiting for response...")
-	channel.basic_consume(cb, queue=SERVER_Q, no_ack=True)
+	channel.basic_consume(cb, queue=BOTTLE_Q, no_ack=True)
 	channel.start_consuming()
 
 # Handles pull and pullr
@@ -95,7 +95,7 @@ def pull(args, channel):
 		shelf.sync()
 		shelf.close()
 
-	channel.basic_consume(cb, queue=SERVER_Q, no_ack=True)
+	channel.basic_consume(cb, queue=BOTTLE_Q, no_ack=True)
 	logv("Waiting for response...")
 	channel.start_consuming()
 
@@ -155,7 +155,7 @@ def setup_conn():
 
 	# Finally connected
 	channel = conn.channel()
-	channel.queue_declare(queue=SERVER_Q)
+	channel.queue_declare(queue=BOTTLE_Q)
 	return (conn, channel)
 		
 def main():
