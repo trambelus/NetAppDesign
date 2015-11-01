@@ -83,6 +83,7 @@ def push(parsed_incoming_pebble):
 	else:
 		channel.basic_publish(exchange='', routing_key='bottle_queue', body=json.dumps(status_success))
 	# Update LEDs
+	global message_count 
 	message_count += 1
 	turn_on_led(message_count)
 
@@ -93,6 +94,7 @@ def pull(parsed_incoming_pebble):
 	channel.basic_publish(exchange='', routing_key='bottle_queue', body=json.dumps(pull_pebble))
 	#	When store is executed then update count
 	# Update LEDs
+	global message_count 
 	message_count -= 1
 	turn_on_led(message_count)
 
@@ -103,6 +105,7 @@ def pullr(parsed_incoming_pebble):
 	channel.basic_publish(exchange='', routing_key='bottle_queue', body=json.dumps(pullr_pebble))
 	#	When store is executed then update count
 	# Update LEDs
+	global message_count 
 	message_count = message_count
 	turn_on_led(message_count)
 
