@@ -130,10 +130,23 @@ def process_args(argv):
 
 	return args
 
+# Get connected to the RabbitMQ server, and return the connection and channel
 def setup_conn():
 	logv("Host: %s" % host)
-	conn = pika.BlockingConnection(pika.ConnectionParameters(host=host,
-		virtual_host='/', credentials=pika.PlainCredentials(username=username, password=password)))
+
+	connected = False # Have we connected yet?
+	timeout = 1 # Increase the wait between connection attempts
+	while not connected:
+		try:
+			conn = pika.BlockingConnection(pika.ConnectionParameters(host=host,
+				virtual_host='/', credentials=pika.PlainCredentials(username=username, password=password)))
+			connected = True
+		except pika.exceptions.ConnectionClosed:
+			logv("Could not connect to host %s, vhost %s, retrying in %d sec" % (host, '/', timeout))
+			time.sleep(timeout)
+			timeout = int(timeout * 1.5)
+
+	# Finally connected
 	channel = conn.channel()
 	channel.queue_declare(queue=SERVER_Q)
 	return (conn, channel)
