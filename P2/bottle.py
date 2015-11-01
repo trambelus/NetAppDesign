@@ -15,6 +15,7 @@ import json
 import time
 import re
 
+shelf = shelve.open(SHELF_FILE) 
 LOGFILE = 'bottle.log'
 SHELF_FILE = 'bottle'
 status_success = {'Status':'success'}
@@ -135,7 +136,6 @@ def find_matches(Qm,Qs,Qa):
 # This is the callback that performs the actions of the bottle
 def callback(ch, method, properties, incoming_pebble):
 	# Message from rabbitMQ = incoming_pebble
-	shelf = shelve.open(SHELF_FILE) 
 	parsed_incoming_pebble = json.loads(incoming_pebble)
 	if parsed_incoming_pebble['Action'] == 'push':
 		# For Push
@@ -171,6 +171,7 @@ def callback(ch, method, properties, incoming_pebble):
 def main():
 	channel.basic_consume(callback, queue='bottle_queue',no_ack=True)
 	channel.start_consuming()
+	shelf.close()
 
 if __name__ == '__main__':
 	main()
