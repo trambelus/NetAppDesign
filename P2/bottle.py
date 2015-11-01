@@ -81,6 +81,9 @@ def push(parsed_incoming_pebble):
 	if shelf_key_push in shelf:
 		channel.basic_publish(exchange='', routing_key='bottle_queue', body=json.dumps(status_failed))
 	else:
+		shelf[shelf_key_push] = json.dumps(parsed_incoming_pebble)
+		shelf.sync()
+		shelf.close()
 		channel.basic_publish(exchange='', routing_key='bottle_queue', body=json.dumps(status_success))
 	# Update LEDs
 	global message_count 
@@ -154,13 +157,8 @@ def callback(ch, method, properties, incoming_pebble):
 	if parsed_incoming_pebble['Action'] == 'push':
 		# For Push
 		# Adding in here to fix shelving unicode error
-		shelf_key = parsed_incoming_pebble['MsgID']
-		shelf_key = shelf_key.encode('utf8')
-		shelf[shelf_key] = json.dumps(parsed_incoming_pebble)
 		log("Syncing and closing shelf")
 		push(parsed_incoming_pebble)
-		shelf.sync()
-		shelf.close()
 	elif parsed_incoming_pebble['Action'] == 'pullr':
 		# For Pullr
 		# Adding in here to fix shelving unicode error
