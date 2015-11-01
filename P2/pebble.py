@@ -124,8 +124,17 @@ def process_args(argv):
 	if args.action == 'pull' or args.action == 'pullr':
 		if args.messageQ:
 			args.messageQ = ' '.join(args.messageQ)
+		else:
+			args.messageQ = ''
+
 		if args.subjectQ:
 			args.subjectQ = ' '.join(args.subjectQ)
+		else:
+			args.subjectQ = ''
+
+		if not args.ageQ:
+			args.ageQ = ''
+			
 	if args.verbose:
 		global verbose; verbose = True
 	if args.host:
