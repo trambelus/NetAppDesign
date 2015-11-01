@@ -19,7 +19,7 @@ import re
 shelf_data = 'bottle'
 status_success = {'Status':'success'}
 status_failed = {'Status':'failed'}
-shelf = shelve.open(shelf_data) 
+shelf = shelve.open(shelf_data,writeback=True) 
 
 #initializing count variable to display count of messages on LEDS
 message_count = 0
