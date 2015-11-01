@@ -15,7 +15,7 @@ import json
 import time
 import re
 
-
+LOGFILE = 'bottle.log'
 shelf_data = 'bottle'
 status_success = {'Status':'success'}
 status_failed = {'Status':'failed'}
