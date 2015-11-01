@@ -90,7 +90,7 @@ def pull(args, channel):
 		channel.stop_consuming()
 		# Shelve all this
 		shelf = shelve.open(DBFILE)
-		shelf[body['MsgID']] = body
+		shelf[json.loads(body.encode('UTF-8'))['MsgID']] = body
 		logv("Syncing and closing shelf")
 		shelf.sync()
 		shelf.close()
@@ -134,7 +134,7 @@ def process_args(argv):
 
 		if not args.ageQ:
 			args.ageQ = ''
-			
+
 	if args.verbose:
 		global verbose; verbose = True
 	if args.host:
