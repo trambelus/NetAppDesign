@@ -19,8 +19,7 @@ import re
 shelf_data = 'bottle'
 status_success = {'Status':'success'}
 status_failed = {'Status':'failed'}
-
-shelf = shelve.open(shelf_data)
+shelf = shelve.open(shelf_data) 
 
 #initializing count variable to display count of messages on LEDS
 message_count = 0
@@ -140,19 +139,28 @@ def callback(ch, method, properties, incoming_pebble):
 	parsed_incoming_pebble = json.loads(incoming_pebble)
 	if parsed_incoming_pebble['Action'] == 'push':
 		# For Push
-		shelf[parsed_incoming_pebble['MsgID']] = json.dumps(parsed_incoming_pebble)
+		# Adding in here to fix shelving unicode error
+		shelf_key = parsed_incoming_pebble['MsgID']
+		shelf_key = shelf_key.encode('utf8')
+		shelf[shelf_key] = json.dumps(parsed_incoming_pebble)
 		log("Syncing and closing shelf")
 		push(parsed_incoming_pebble)
 		shelf.sync()
 	elif parsed_incoming_pebble['Action'] == 'pullr':
 		# For Pullr
-		shelf[parsed_incoming_pebble['MsgID']] = json.dumps(parsed_incoming_pebble)
+		# Adding in here to fix shelving unicode error
+		shelf_key = parsed_incoming_pebble['MsgID']
+		shelf_key = shelf_key.encode('utf8')
+		shelf[shelf_key] = json.dumps(parsed_incoming_pebble)
 		logv("Syncing and closing shelf")
 		pullr(parsed_incoming_pebble)
 		shelf.sync()
 	elif parsed_incoming_pebble['Action'] == 'pull':
 		# For Pull
-		shelf[parsed_incoming_pebble['MsgID']] = json.dumps(parsed_incoming_pebble)
+		# Adding in here to fix shelving unicode error
+		shelf_key = parsed_incoming_pebble['MsgID']
+		shelf_key = shelf_key.encode('utf8')
+		shelf[shelf_key] = json.dumps(parsed_incoming_pebble)
 		logv("Syncing and closing shelf")
 		pull(parsed_incoming_pebble)
 		shelf.sync()
