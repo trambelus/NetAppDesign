@@ -15,9 +15,10 @@ import json
 import time
 import re
 
-shelf = shelve.open(SHELF_FILE) 
+ 
 LOGFILE = 'bottle.log'
 SHELF_FILE = 'bottle'
+shelf = shelve.open(SHELF_FILE)
 status_success = {'Status':'success'}
 status_failed = {'Status':'failed'}
 #shelf = shelve.open(shelf) 
