@@ -59,9 +59,17 @@ def push(args, channel):
 			"Message": "{4}" 
 		}}
 	""".format(args.author, args.age, msgid(), args.subject, args.message)
-	logv("Sending JSON: \n%s" % json_msg)
+	log("Sending JSON: \n%s" % json_msg)
 	send(json_msg, channel)
-	logv("Sent")
+
+	def cb(channel, message, properties, body):
+		log("Response received: ", channel, message, properties, body)
+		# Stop the infinite loop on the channel
+		channel.stop_consuming()
+
+	logv("Waiting for response...")
+	channel.basic_consume(cb, queue=SERVER_Q, no_ack=True)
+	channel.start_consuming()
 
 # Handles pull and pullr
 def pull(args, channel):
@@ -73,7 +81,7 @@ def pull(args, channel):
 			"Age": "{3}"
 		}}
 	""".format(args.action, args.messageQ, args.subjectQ, args.ageQ)
-	logv("Sending JSON: \n%s" % json_msg)
+	log("Sending JSON: \n%s" % json_msg)
 	send(json_msg, channel)
 
 	def cb(channel, message, properties, body):
@@ -90,7 +98,6 @@ def pull(args, channel):
 	channel.basic_consume(cb, queue=SERVER_Q, no_ack=True)
 	logv("Waiting for response...")
 	channel.start_consuming()
-
 
 def process_args(argv):
 	# Setup and parse
