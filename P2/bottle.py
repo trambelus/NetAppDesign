@@ -16,10 +16,10 @@ import time
 import re
 
 LOGFILE = 'bottle.log'
-shelf_data = 'bottle'
+SHELF_FILE = 'bottle'
 status_success = {'Status':'success'}
 status_failed = {'Status':'failed'}
-#shelf = shelve.open(shelf_data) 
+#shelf = shelve.open(shelf) 
 
 #initializing count variable to display count of messages on LEDS
 message_count = 0
@@ -72,9 +72,8 @@ def logv(*msg):
 # This is the function for the push request
 def push(parsed_incoming_pebble):
 	#	Store in Shelve, sends reply that it pushed pebble
-	push_pebble = find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age'])
 	#	When store is executed then update count
-	if push_pebble == 'status_failed':
+	if parsed_incoming_pebble['MsgID'] in shelf:
 		channel.basic_publish(exchange='', routing_key='bottle_queue', body=json.dumps(status_failed))
 	else:
 		channel.basic_publish(exchange='', routing_key='bottle_queue', body=json.dumps(status_success))
@@ -124,8 +123,8 @@ def age_match(pattern,age):
 # This function will find all of the matching pebbles
 def find_matches(Qm,Qs,Qa):
 	ret = []
-	for key in shelf_data:
-		entry = json.loads(shelf_data[key])
+	for key in shelf:
+		entry = json.loads(shelf[key])
 		if re.search(id,entry['MsgID']): # Look into this
 			ret = status_failed # Look into this
 		else:
@@ -136,7 +135,7 @@ def find_matches(Qm,Qs,Qa):
 # This is the callback that performs the actions of the bottle
 def callback(ch, method, properties, incoming_pebble):
 	# Message from rabbitMQ = incoming_pebble
-	shelf = shelve.open(shelf_data) 
+	shelf = shelve.open(SHELF_FILE) 
 	parsed_incoming_pebble = json.loads(incoming_pebble)
 	if parsed_incoming_pebble['Action'] == 'push':
 		# For Push
