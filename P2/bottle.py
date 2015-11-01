@@ -19,7 +19,7 @@ import re
 shelf_data = 'bottle'
 status_success = {'Status':'success'}
 status_failed = {'Status':'failed'}
-shelf = shelve.open(shelf_data) 
+#shelf = shelve.open(shelf_data) 
 
 #initializing count variable to display count of messages on LEDS
 message_count = 0
@@ -136,6 +136,7 @@ def find_matches(Qm,Qs,Qa):
 # This is the callback that performs the actions of the bottle
 def callback(ch, method, properties, incoming_pebble):
 	# Message from rabbitMQ = incoming_pebble
+	shelf = shelve.open(shelf_data) 
 	parsed_incoming_pebble = json.loads(incoming_pebble)
 	if parsed_incoming_pebble['Action'] == 'push':
 		# For Push
@@ -146,6 +147,7 @@ def callback(ch, method, properties, incoming_pebble):
 		log("Syncing and closing shelf")
 		push(parsed_incoming_pebble)
 		shelf.sync()
+		shelf.close()
 	elif parsed_incoming_pebble['Action'] == 'pullr':
 		# For Pullr
 		# Adding in here to fix shelving unicode error
@@ -155,6 +157,7 @@ def callback(ch, method, properties, incoming_pebble):
 		logv("Syncing and closing shelf")
 		pullr(parsed_incoming_pebble)
 		shelf.sync()
+		shelf.close()
 	elif parsed_incoming_pebble['Action'] == 'pull':
 		# For Pull
 		# Adding in here to fix shelving unicode error
@@ -164,6 +167,7 @@ def callback(ch, method, properties, incoming_pebble):
 		logv("Syncing and closing shelf")
 		pull(parsed_incoming_pebble)
 		shelf.sync()
+		shelf.close()
 
 def main():
 	channel.basic_consume(callback, queue='bottle_queue',no_ack=True)
