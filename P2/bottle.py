@@ -125,7 +125,7 @@ def age_match(pattern,age):
 def find_matches(Qm,Qs,Qa):
 	ret = []
 	for key in shelf_data:
-		entry = json.loads(shelf_bottle[key])
+		entry = json.loads(shelf_data[key])
 		if re.search(id,entry['MsgID']): # Look into this
 			ret = status_failed # Look into this
 		else:
