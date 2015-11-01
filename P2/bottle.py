@@ -75,7 +75,10 @@ def logv(*msg):
 def push(parsed_incoming_pebble):
 	#	Store in Shelve, sends reply that it pushed pebble
 	#	When store is executed then update count
-	if parsed_incoming_pebble['MsgID'] in shelf:
+	# Adding in here to fix shelving unicode error
+	shelf_key_push = parsed_incoming_pebble['MsgID']
+	shelf_key_push = shelf_key.encode('utf8')
+	if shelf_key_push in shelf:
 		channel.basic_publish(exchange='', routing_key='bottle_queue', body=json.dumps(status_failed))
 	else:
 		channel.basic_publish(exchange='', routing_key='bottle_queue', body=json.dumps(status_success))
