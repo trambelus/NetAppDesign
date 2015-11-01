@@ -91,7 +91,8 @@ def push(parsed_incoming_pebble):
 
 # This is the function for the pull request
 def pull(parsed_incoming_pebble):
-	pull_pebble = find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age'])
+	remove_pull = True
+	pull_pebble = find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age'],remove_pull)
 	#	Remove message from Shelve send it to pebble pi.
 	channel.basic_publish(exchange='', routing_key='bottle_queue', body=json.dumps(pull_pebble))
 	#	When store is executed then update count
@@ -102,7 +103,8 @@ def pull(parsed_incoming_pebble):
 
 # This is the function for the pullr request
 def pullr(parsed_incoming_pebble):
-	pullr_pebble = find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age'])
+	remove_pull = False
+	pullr_pebble = find_matches(parsed_incoming_pebble['Message'],parsed_incoming_pebble['Subject'],parsed_incoming_pebble['Age'],remove_pull)
 	#	Copy message from Shelve send it to pebble pi.
 	channel.basic_publish(exchange='', routing_key='bottle_queue', body=json.dumps(pullr_pebble))
 	#	When store is executed then update count
@@ -131,16 +133,27 @@ def age_match(pattern,age):
 	return int(age) == int(pattern)
 
 # This function will find all of the matching pebbles
-def find_matches(Qm,Qs,Qa):
+def find_matches(Qm,Qs,Qa,remove_pull):
 	ret = []
-	for key in shelf:
-		entry = json.loads(shelf[key])
-		if re.search(id,entry['MsgID']): # Look into this
-			ret = status_failed # Look into this
-		else:
-			if re.search(Qm,entry['Message']) and re.search(Qs,entry['Subject']) and age_match(Qa,entry['Age']):
-				ret.append(entry)
-	return ret;
+	if remove_pull == True:
+		for key in shelf:
+			entry = json.loads(shelf[key])
+			if re.search(id,entry['MsgID']):
+				ret = status_failed
+			else:
+				if re.search(Qm,entry['Message']) and re.search(Qs,entry['Subject']) and age_match(Qa,entry['Age']):
+					ret.append(entry)
+					del shelf[key] # removes from shelf
+		return ret;
+	else:
+		for key in shelf:
+			entry = json.loads(shelf[key])
+			if re.search(id,entry['MsgID']):
+				ret = status_failed
+			else:
+				if re.search(Qm,entry['Message']) and re.search(Qs,entry['Subject']) and age_match(Qa,entry['Age']):
+					ret.append(entry)
+		return ret;
 
 # This is the callback that performs the actions of the bottle
 def callback(ch, method, properties, incoming_pebble):
@@ -160,19 +173,10 @@ def callback(ch, method, properties, incoming_pebble):
 		push(parsed_incoming_pebble)
 	elif parsed_incoming_pebble['Action'] == 'pullr':
 		# For Pullr
-		# Adding in here to fix shelving unicode error
-		shelf_key = parsed_incoming_pebble['MsgID']
-		shelf_key = shelf_key.encode('utf8')
-		shelf[shelf_key] = json.dumps(parsed_incoming_pebble)
 		logv("Syncing and closing shelf")
 		pullr(parsed_incoming_pebble)
-		shelf.sync()
 	elif parsed_incoming_pebble['Action'] == 'pull':
 		# For Pull
-		# Adding in here to fix shelving unicode error
-		shelf_key = parsed_incoming_pebble['MsgID']
-		shelf_key = shelf_key.encode('utf8')
-		shelf[shelf_key] = json.dumps(parsed_incoming_pebble)
 		logv("Syncing and closing shelf")
 		pull(parsed_incoming_pebble)
 		shelf.sync()
