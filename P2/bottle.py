@@ -143,7 +143,9 @@ def find_matches(Qm,Qs,Qa):
 # This is the callback that performs the actions of the bottle
 def callback(ch, method, properties, incoming_pebble):
 	# Message from rabbitMQ = incoming_pebble
+	print(incoming_pebble)
 	parsed_incoming_pebble = json.loads(incoming_pebble)
+	print(parsed_incoming_pebble)
 	if parsed_incoming_pebble['Action'] == 'push':
 		# For Push
 		# Adding in here to fix shelving unicode error
