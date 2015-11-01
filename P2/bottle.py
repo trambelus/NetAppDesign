@@ -147,6 +147,8 @@ def callback(ch, method, properties, incoming_pebble):
 	incoming_pebble = incoming_pebble.encode('ascii')
 	parsed_incoming_pebble = json.loads(incoming_pebble)
 	if 'Action' not in parsed_incoming_pebble:
+		channel.basic_publish(exchange='', routing_key='bottle_queue', body=incoming_pebble)
+		time.sleep(5)
 		return
 	print(parsed_incoming_pebble)
 	if parsed_incoming_pebble['Action'] == 'push':
