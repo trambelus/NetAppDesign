@@ -146,7 +146,7 @@ def callback(ch, method, properties, incoming_pebble):
 	print(incoming_pebble)
 	parsed_incoming_pebble = json.loads(incoming_pebble)
 	print(parsed_incoming_pebble)
-	if parsed_incoming_pebble['Action'] == 'push':
+	if parsed_incoming_pebble[u'Action'] == 'push':
 		# For Push
 		# Adding in here to fix shelving unicode error
 		shelf_key = parsed_incoming_pebble['MsgID']
