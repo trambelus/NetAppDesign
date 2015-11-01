@@ -146,6 +146,8 @@ def callback(ch, method, properties, incoming_pebble):
 	print(incoming_pebble)
 	incoming_pebble = incoming_pebble.encode('ascii')
 	parsed_incoming_pebble = json.loads(incoming_pebble)
+	if 'Action' not in parsed_incoming_pebble:
+		return
 	print(parsed_incoming_pebble)
 	if parsed_incoming_pebble['Action'] == 'push':
 		# For Push
