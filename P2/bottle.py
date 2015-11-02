@@ -176,6 +176,9 @@ def callback(ch, method, properties, incoming_pebble):
 		shelf.sync()
 
 def main():
+	for key in shelf:
+		global message_count
+		message_count +=1
 	channel.basic_consume(callback, queue='bottle_queue',no_ack=True)
 	channel.start_consuming()
 	shelf.close()
