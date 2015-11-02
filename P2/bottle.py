@@ -14,6 +14,8 @@ import pika
 import json
 import time
 import re
+import avahi
+import dbus
 
  
 LOGFILE = 'bottle.log'
@@ -21,7 +23,6 @@ SHELF_FILE = 'bottle'
 shelf = shelve.open(SHELF_FILE)
 status_success = {'Status':'success'}
 status_failed = {'Status':'failed'}
-#shelf = shelve.open(shelf) 
 
 #initializing count variable to display count of messages on LEDS
 message_count = 0
@@ -54,6 +55,54 @@ GPIO.output(LEDs[2], GPIO.LOW)
 
 GPIO.setup(LEDs[3], GPIO.OUT)
 GPIO.output(LEDs[3], GPIO.LOW)
+
+__all__ = ["ZeroconfService"]
+
+class ZeroconfService:
+    """A simple class to publish a network service with zeroconf using
+    avahi.
+
+    """
+
+    def __init__(self, name, port, stype="_http._tcp",
+                 domain="", host="", text=""):
+        self.name = name
+        self.stype = stype
+        self.domain = domain
+        self.host = host
+        self.port = port
+        self.text = text
+
+    def publish(self):
+        bus = dbus.SystemBus()
+        server = dbus.Interface(
+                         bus.get_object(
+                                 avahi.DBUS_NAME,
+                                 avahi.DBUS_PATH_SERVER),
+                        avahi.DBUS_INTERFACE_SERVER)
+
+        g = dbus.Interface(
+                    bus.get_object(avahi.DBUS_NAME,
+                                   server.EntryGroupNew()),
+                    avahi.DBUS_INTERFACE_ENTRY_GROUP)
+
+        g.AddService(avahi.IF_UNSPEC, avahi.PROTO_UNSPEC,dbus.UInt32(0),
+                     self.name, self.stype, self.domain, self.host,
+                     dbus.UInt16(self.port), self.text)
+
+        g.Commit()
+        self.group = g
+
+    def unpublish(self):
+        self.group.Reset()
+
+
+def test():
+    service = ZeroconfService(name="T25bottle", port=3000)
+    service.publish()
+    raw_input("Press any key to unpublish the service ")
+    service.unpublish()
+
 
 def log(*msg):
 	"""
@@ -176,6 +225,7 @@ def callback(ch, method, properties, incoming_pebble):
 		shelf.sync()
 
 def main():
+	test()
 	for key in shelf:
 		global message_count
 		message_count +=1
