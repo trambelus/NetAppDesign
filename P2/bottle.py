@@ -64,13 +64,6 @@ def log(*msg):
 	with open(LOGFILE, 'a') as f:
 		f.write(output + '\n')
 
-def logv(*msg):
-	"""
-	Exactly the same as log(), if verbose=True. Otherwise does nothing.
-	"""
-	if verbose:
-		log(*msg)
-
 # This is the function for the push request
 def push(parsed_incoming_pebble):
 	#	Store in Shelve, sends reply that it pushed pebble
@@ -173,11 +166,11 @@ def callback(ch, method, properties, incoming_pebble):
 		push(parsed_incoming_pebble)
 	elif parsed_incoming_pebble['Action'] == 'pullr':
 		# For Pullr
-		logv("Syncing and closing shelf")
+		log("Syncing and closing shelf")
 		pullr(parsed_incoming_pebble)
 	elif parsed_incoming_pebble['Action'] == 'pull':
 		# For Pull
-		logv("Syncing and closing shelf")
+		log("Syncing and closing shelf")
 		pull(parsed_incoming_pebble)
 		shelf.sync()
 
