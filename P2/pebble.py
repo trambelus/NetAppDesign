@@ -63,7 +63,8 @@ def push(args, channel):
 	send(json_msg, channel)
 
 	def cb(channel, message, properties, body):
-		log("Response received: ", body)
+		logv("Response received: ", body)
+		log("Server returned status: %s" % json.loads(body)['Status'])
 		# Stop the infinite loop on the channel
 		channel.stop_consuming()
 
@@ -85,7 +86,7 @@ def pull(args, channel):
 	send(json_msg, channel)
 
 	def cb(channel, message, properties, body):
-		log("Response: ", channel, message, properties, body)
+		logv("Response: ", body)
 		# Stop the infinite loop on the channel
 		channel.stop_consuming()
 		responses = json.loads(body.decode('UTF-8'))
