@@ -8,6 +8,7 @@ import json
 import pika
 import sys
 import shelve
+import socket
 import time
 from zeroconf import ServiceBrowser, Zeroconf
 
@@ -115,7 +116,7 @@ class Listener(object):
 		info = zeroconf.get_service_info(type, name)
 		if SNAME in name:
 			logv(info)
-			self.ret.append(info.address)
+			self.ret.append(socket.inet_ntoa(info.address))
 
 def get_host():
 	ret = []
