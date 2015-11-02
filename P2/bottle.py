@@ -44,6 +44,7 @@ LEDs = [11, 12, 13, 15]
 # Setup GPIO as output
 #included with your kits, these are marked 17, 18, 27, and 22. Change the GPIO accordingly
 GPIO.setmode(GPIO.BOARD)
+GPIO.setwarnings(False)
 GPIO.setup(LEDs[0], GPIO.OUT)
 GPIO.output(LEDs[0], GPIO.LOW)
 
