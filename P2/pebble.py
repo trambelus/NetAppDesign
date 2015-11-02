@@ -64,7 +64,7 @@ def push(args, channel):
 
 	def cb(channel, message, properties, body):
 		logv("Response received: ", body)
-		log("Server returned status: %s" % json.loads(body)['Status'])
+		log("Server returned status: %s" % json.loads(body.decode('UTF-8'))['Status'])
 		# Stop the infinite loop on the channel
 		channel.stop_consuming()
 
