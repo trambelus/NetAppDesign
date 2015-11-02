@@ -119,7 +119,7 @@ def turn_on_led(message_count):
 
 # This function will perform age comparisons
 def age_match(pattern,age):
-	if pattern[0] == '':
+	if pattern == '':
 		return True
 	if pattern[0] == '>':
 		return int(age) > int(pattern[1:])
