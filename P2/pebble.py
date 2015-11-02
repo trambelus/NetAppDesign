@@ -108,29 +108,26 @@ def pull(args, channel):
 	channel.start_consuming()
 
 class Listener(object):
-	def __init__(self, cb):
-		self.cb = cb
+	def __init__(self, ret):
+		self.ret = ret
 
 	def add_service(self, zeroconf, type, name):
 		info = zeroconf.get_service_info(type, name)
 		if SNAME in name:
-			self.cb(name)
+			logv(info)
+			self.ret[0] = info.address
 
 def get_host():
 
-	ret = None
-	def cb(name):
-		logv("Found %s" % name)
-		ret = name
-		zeroconf.close()
+	ret = []
 
 	zeroconf = Zeroconf()
-	listener = Listener(cb)
+	listener = Listener(ret)
 	browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
 	logv("Searching for %s" % SNAME)
-	while not ret:
+	while len(ret) == 0:
 		time.sleep(1)
-	return ret
+	return ret[0]
 
 
 def process_args(argv):
