@@ -115,12 +115,10 @@ class Listener(object):
 		info = zeroconf.get_service_info(type, name)
 		if SNAME in name:
 			logv(info)
-			self.ret[0] = info.address
+			self.ret.append(info.address)
 
 def get_host():
-
 	ret = []
-
 	zeroconf = Zeroconf()
 	listener = Listener(ret)
 	browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
