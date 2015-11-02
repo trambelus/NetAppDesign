@@ -120,6 +120,7 @@ def get_host():
 
 	ret = None
 	def cb(name):
+		logv("Found %s" % name)
 		ret = name
 		zeroconf.close()
 
