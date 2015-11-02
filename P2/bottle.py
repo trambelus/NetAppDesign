@@ -131,23 +131,15 @@ def find_matches(Qm,Qs,Qa,remove_pull):
 	if remove_pull == True:
 		for key in shelf:
 			entry = json.loads(shelf[key])
-			entry = entry.encode('ascii')
-			if re.search(id,entry['MsgID']):
-				ret = status_failed
-			else:
-				if re.search(Qm,entry['Message']) and re.search(Qs,entry['Subject']) and age_match(Qa,entry['Age']):
-					ret.append(entry)
-					del shelf[key] # removes from shelf
+			if re.search(Qm,entry['Message']) and re.search(Qs,entry['Subject']) and age_match(Qa,entry['Age']):
+				ret.append(entry)
+				del shelf[key] # removes from shelf
 		return ret;
 	else:
 		for key in shelf:
 			entry = json.loads(shelf[key])
-			entry = entry.encode('ascii')
-			if re.search(id,entry['MsgID']):
-				ret = status_failed
-			else:
-				if re.search(Qm,entry['Message']) and re.search(Qs,entry['Subject']) and age_match(Qa,entry['Age']):
-					ret.append(entry)
+			if re.search(Qm,entry['Message']) and re.search(Qs,entry['Subject']) and age_match(Qa,entry['Age']):
+				ret.append(entry)
 		return ret;
 
 # This is the callback that performs the actions of the bottle
