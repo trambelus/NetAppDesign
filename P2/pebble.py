@@ -20,6 +20,7 @@ AGE_DEFAULT = 20
 TEAM = 'Team25'
 SNAME = "T25bottle"
 
+host = ''
 username = 'john'
 password = '12345'
 verbose = False
