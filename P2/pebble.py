@@ -110,16 +110,20 @@ def pull(args, channel):
 
 class Listener(object):
 	def __init__(self, ret):
-		self.ret = ret
+		self.ret = ret # So add_service can access ret
 
 	def add_service(self, zeroconf, type, name):
 		info = zeroconf.get_service_info(type, name)
 		if SNAME in name:
 			logv(info)
 			self.ret.append(socket.inet_ntoa(info.address))
+			# This is the same ret object in get_host() below.
+			# It's now a singleton: [address].
+			# The while loop below will pick this up and break,
+			# and then return the single object inside this list.
 
 def get_host():
-	ret = []
+	ret = [] # Gets passed to Listener
 	zeroconf = Zeroconf()
 	listener = Listener(ret)
 	browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
