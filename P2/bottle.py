@@ -4,8 +4,7 @@
 # ECE 4564
 # Description: Created a server on the raspberrypiII that is connected to a breadboard via gpio pins
 # when a client connects it can light up LEDs on the breadboard based on the message it receives through RabbitMQ.
-# Commented out code is from example code.  I left it so i can follow what is happening in the examples.
-# I should return a status of good or bad
+# Code Credits: http://stackoverflow.com/questions/3430245/how-to-develop-an-avahi-client-server
 import shelve
 import time
 import RPi.GPIO as GPIO
@@ -17,7 +16,7 @@ import re
 import avahi
 import dbus
 
- 
+# Global variables
 LOGFILE = 'bottle.log'
 SHELF_FILE = 'bottle'
 shelf = shelve.open(SHELF_FILE)
@@ -26,13 +25,12 @@ status_failed = {'Status':'failed'}
 
 #initializing count variable to display count of messages on LEDS
 message_count = 0
+# Setting up rabbitmq connections
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
 channel = connection.channel()
 
 channel.queue_declare(queue='bottle_queue')
 
-
-# GPIO pin number of LED according to spec; GPIO pin 18 Phys Pin 12
 
 # LED11 = 11 # Physical pin = 11. GPIO pin = 17
 # LED12 = 12 # Physical pin = 12. GPIO pin = 18
@@ -200,7 +198,6 @@ def find_matches(Qm,Qs,Qa,remove_pull):
 def callback(ch, method, properties, incoming_pebble):
 	# Message from rabbitMQ = incoming_pebble
 	print(incoming_pebble)
-	print('Count = ', message_count)
 	incoming_pebble = incoming_pebble.encode('ascii')
 	parsed_incoming_pebble = json.loads(incoming_pebble)
 	if 'Action' not in parsed_incoming_pebble:
@@ -210,7 +207,6 @@ def callback(ch, method, properties, incoming_pebble):
 	print(parsed_incoming_pebble)
 	if parsed_incoming_pebble['Action'] == 'push':
 		# For Push
-		# Adding in here to fix shelving unicode error
 		log("Syncing and closing shelf")
 		push(parsed_incoming_pebble)
 	elif parsed_incoming_pebble['Action'] == 'pullr':
@@ -226,7 +222,7 @@ def callback(ch, method, properties, incoming_pebble):
 def main():
 	test()
 	global message_count
-	message_count  = len(shelf)
+	message_count  = len(shelf) # Getting the new value for message count if the program is restarted
 	channel.basic_consume(callback, queue='bottle_queue',no_ack=True)
 	channel.start_consuming()
 	shelf.close()
