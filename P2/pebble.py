@@ -90,6 +90,7 @@ def pull(args, channel):
 		channel.stop_consuming()
 		# Shelve all this
 		shelf = shelve.open(DBFILE)
+		logv("Checking for msgid: %s" % json.loads(body.decode('UTF-8'))['MsgID'])
 		shelf[json.loads(body.decode('UTF-8'))['MsgID']] = body
 		logv("Syncing and closing shelf")
 		shelf.sync()
