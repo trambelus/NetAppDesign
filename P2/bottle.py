@@ -111,7 +111,7 @@ def turn_on_led(message_count):
 	for i in range(4):
 		if message_count & 2**i:
 			#turn on LED
-			GPIO.output(LEDs[0],GPIO.HIGH) # Turn on LED
+			GPIO.output(LEDs[i],GPIO.HIGH) # Turn on LED
 			print('Turning on LED',LEDs[i])
 		else:
 			#turn off LED
