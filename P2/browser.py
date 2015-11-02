@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     zeroconf = Zeroconf()
     print("\nBrowsing services, press Ctrl-C to exit...\n")
-    browser = ServiceBrowser(zeroconf, "_http._tcp.", handlers=[on_service_state_change])
+    browser = ServiceBrowser(zeroconf, "_http._tcp", handlers=[on_service_state_change])
 
     try:
         while True:
