@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # http://avahi.org/wiki/PythonBrowseExample
-import dbus, gobject, avahi
+import dbus, gi as gobject, avahi
 from dbus import DBusException
 from dbus.mainloop.glib import DBusGMainLoop
 
