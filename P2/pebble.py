@@ -88,13 +88,17 @@ def pull(args, channel):
 		log("Response: ", channel, message, properties, body)
 		# Stop the infinite loop on the channel
 		channel.stop_consuming()
-		# Shelve all this
-		shelf = shelve.open(DBFILE)
-		logv("Decoded: %s" % json.loads(body.decode('UTF-8')))
-		shelf[json.loads(body.decode('UTF-8'))['MsgID']] = body
-		logv("Syncing and closing shelf")
-		shelf.sync()
-		shelf.close()
+		responses = json.loads(body.decode('UTF-8'))
+		if len(responses) == 0:
+			log("No matching entries found.")
+		else:
+			shelf = shelve.open(DBFILE)
+			for i in range(len(responses)):
+				log("Response %d:\n%s" % (i+1, responses[i]))
+				shelf[responses[i]['MsgID']] = responses[i]
+			logv("Syncing and closing shelf")
+			shelf.sync()
+			shelf.close()
 
 	channel.basic_consume(cb, queue=BOTTLE_Q, no_ack=True)
 	logv("Waiting for response...")
