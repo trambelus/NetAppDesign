@@ -131,6 +131,7 @@ def find_matches(Qm,Qs,Qa,remove_pull):
 	if remove_pull == True:
 		for key in shelf:
 			entry = json.loads(shelf[key])
+			entry = entry.encode('ascii')
 			if re.search(id,entry['MsgID']):
 				ret = status_failed
 			else:
@@ -141,6 +142,7 @@ def find_matches(Qm,Qs,Qa,remove_pull):
 	else:
 		for key in shelf:
 			entry = json.loads(shelf[key])
+			entry = entry.encode('ascii')
 			if re.search(id,entry['MsgID']):
 				ret = status_failed
 			else:
