@@ -107,7 +107,7 @@ def pull(args, channel):
 	channel.start_consuming()
 
 class Listener(object):
-	def __init__(cb):
+	def __init__(self, cb):
 		self.cb = cb
 
 	def add_service(self, zeroconf, type, name):
