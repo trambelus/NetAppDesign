@@ -148,6 +148,7 @@ def find_matches(Qm,Qs,Qa,remove_pull):
 def callback(ch, method, properties, incoming_pebble):
 	# Message from rabbitMQ = incoming_pebble
 	print(incoming_pebble)
+	print('Count = ', message_count)
 	incoming_pebble = incoming_pebble.encode('ascii')
 	parsed_incoming_pebble = json.loads(incoming_pebble)
 	if 'Action' not in parsed_incoming_pebble:
