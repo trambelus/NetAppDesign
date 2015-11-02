@@ -113,7 +113,7 @@ class Listener(object):
 	def add_service(self, zeroconf, type, name):
 		info = zeroconf.get_service_info(type, name)
 		if SNAME in name:
-			cb(name)
+			self.cb(name)
 
 def get_host():
 
