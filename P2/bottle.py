@@ -91,7 +91,7 @@ def pull(parsed_incoming_pebble):
 	#	When store is executed then update count
 	# Update LEDs
 	global message_count 
-	message_count -= 1
+	#message_count -= 1
 	turn_on_led(message_count)
 
 # This is the function for the pullr request
@@ -136,6 +136,8 @@ def find_matches(Qm,Qs,Qa,remove_pull):
 			if re.search(Qm,entry['Message']) and re.search(Qs,entry['Subject']) and age_match(Qa,entry['Age']):
 				ret.append(entry)
 				del shelf[key] # removes from shelf
+				global message_count 
+				message_count -= 1
 		return ret;
 	else:
 		for key in shelf:
