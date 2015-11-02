@@ -112,9 +112,11 @@ def turn_on_led(message_count):
 		if message_count & 2**i:
 			#turn on LED
 			GPIO.output(LEDs[i],GPIO.HIGH) # Turn on LED
+			print('Turning on LED')
 		else:
 			#turn off LED
 			GPIO.output(LEDs[i],GPIO.LOW) # Turn off LED
+			print('Turning off LED')
 
 
 # This function will perform age comparisons
