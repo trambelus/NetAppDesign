@@ -9,7 +9,7 @@ import pika
 import sys
 import shelve
 import time
-import zeroconf
+from zeroconf import ServiceBrowser, Zeroconf
 
 LOGFILE = 'pebble.log'
 DBFILE = 'pebble'
@@ -18,8 +18,8 @@ BOTTLE_Q = 'bottle_queue'
 AUTHOR_DEFAULT = 'John'
 AGE_DEFAULT = 20
 TEAM = 'Team25'
+SNAME = "T25bottle"
 
-host = 'localhost'
 username = 'john'
 password = '12345'
 verbose = False
@@ -106,6 +106,31 @@ def pull(args, channel):
 	logv("Waiting for response...")
 	channel.start_consuming()
 
+class Listener(object):
+	def __init__(cb):
+		self.cb = cb
+
+	def add_service(self, zeroconf, type, name):
+		info = zeroconf.get_service_info(type, name)
+		if SNAME in name:
+			cb(name)
+
+def get_host():
+
+	ret = None
+   def cb(name):
+   	ret = name
+   	zeroconf.close()
+
+	zeroconf = Zeroconf()
+	listener = Listener(cb)
+	browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
+	logv("Searching for %s" % SNAME)
+	while not ret:
+		time.sleep(1)
+	return ret
+
+
 def process_args(argv):
 	# Setup and parse
 	parser = argparse.ArgumentParser(description='Sends and receives messages to/from a bottle')
@@ -146,6 +171,9 @@ def process_args(argv):
 		global verbose; verbose = True
 	if args.host:
 		global host; host = args.host
+	else:
+		global host; host = get_host()
+
 	if args.username:
 		global username; username = args.username
 	if args.password:
