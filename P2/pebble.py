@@ -90,7 +90,7 @@ def pull(args, channel):
 		channel.stop_consuming()
 		# Shelve all this
 		shelf = shelve.open(DBFILE)
-		shelf[json.loads(body.encode('UTF-8'))['MsgID']] = body
+		shelf[json.loads(body.decode('UTF-8'))['MsgID']] = body
 		logv("Syncing and closing shelf")
 		shelf.sync()
 		shelf.close()
@@ -160,7 +160,7 @@ def setup_conn():
 		except pika.exceptions.ConnectionClosed:
 			logv("Could not connect to host %s, vhost %s, retrying in %d sec" % (host, '/', timeout))
 			time.sleep(int(timeout))
-			timeout = timeout * 1.61803399
+			timeout = timeout + 1 if timeout < 5 else 5
 
 	# Finally connected
 	channel = conn.channel()
