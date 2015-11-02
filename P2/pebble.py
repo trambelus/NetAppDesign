@@ -118,9 +118,9 @@ class Listener(object):
 def get_host():
 
 	ret = None
-   def cb(name):
-   	ret = name
-   	zeroconf.close()
+	def cb(name):
+		ret = name
+		zeroconf.close()
 
 	zeroconf = Zeroconf()
 	listener = Listener(cb)
