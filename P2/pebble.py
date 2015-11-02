@@ -93,6 +93,7 @@ def pull(args, channel):
 		if len(responses) == 0:
 			log("No matching entries found.")
 		else:
+			log("Found %d responses:" % len(responses))
 			shelf = shelve.open(DBFILE)
 			for i in range(len(responses)):
 				log("Response %d:\n%s" % (i+1, responses[i]))
