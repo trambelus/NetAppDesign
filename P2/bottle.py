@@ -100,8 +100,6 @@ class ZeroconfService:
 def test():
     service = ZeroconfService(name="T25bottle", port=3000)
     service.publish()
-    raw_input("Press any key to unpublish the service ")
-    service.unpublish()
 
 
 def log(*msg):
@@ -226,12 +224,12 @@ def callback(ch, method, properties, incoming_pebble):
 
 def main():
 	test()
-	for key in shelf:
-		global message_count
-		message_count +=1
+	global message_count
+	message_count  = len(shelf)
 	channel.basic_consume(callback, queue='bottle_queue',no_ack=True)
 	channel.start_consuming()
 	shelf.close()
+	service.unpublish()
 
 if __name__ == '__main__':
 	main()
