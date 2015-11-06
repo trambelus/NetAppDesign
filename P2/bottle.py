@@ -120,7 +120,7 @@ def push(parsed_incoming_pebble):
 	if shelf_key_push in shelf:
 		channel.basic_publish(exchange='', routing_key='bottle_queue', body=json.dumps(status_failed))
 	else:
-		shelf[shelf_key_push] = json.dumps(parsed_incoming_pebble)
+		shelf[shelf_key_push] = json.dumps(parsed_incoming_pebble) # Convert to JSON
 		shelf.sync()
 		channel.basic_publish(exchange='', routing_key='bottle_queue', body=json.dumps(status_success))
 	# Update LEDs
@@ -180,7 +180,7 @@ def find_matches(Qm,Qs,Qa,remove_pull):
 	ret = []
 	if remove_pull == True:
 		for key in shelf:
-			entry = json.loads(shelf[key])
+			entry = json.loads(shelf[key]) # Convert to dictionary
 			if re.search(Qm,entry['Message']) and re.search(Qs,entry['Subject']) and age_match(Qa,entry['Age']):
 				ret.append(entry)
 				del shelf[key] # removes from shelf
@@ -189,7 +189,7 @@ def find_matches(Qm,Qs,Qa,remove_pull):
 		return ret;
 	else:
 		for key in shelf:
-			entry = json.loads(shelf[key])
+			entry = json.loads(shelf[key]) # Convert to dictionary
 			if re.search(Qm,entry['Message']) and re.search(Qs,entry['Subject']) and age_match(Qa,entry['Age']):
 				ret.append(entry)
 		return ret;
@@ -199,7 +199,7 @@ def callback(ch, method, properties, incoming_pebble):
 	# Message from rabbitMQ = incoming_pebble
 	print(incoming_pebble)
 	incoming_pebble = incoming_pebble.encode('ascii')
-	parsed_incoming_pebble = json.loads(incoming_pebble)
+	parsed_incoming_pebble = json.loads(incoming_pebble) # Convert to dictionary
 	if 'Action' not in parsed_incoming_pebble:
 		channel.basic_publish(exchange='', routing_key='bottle_queue', body=incoming_pebble)
 		time.sleep(5)
