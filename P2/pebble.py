@@ -37,7 +37,7 @@ def log(*msg):
 
 def logv(*msg):
 	"""
-	Exactly the same as log(), if verbose=True. Otherwise does nothing.
+	Exactly the same as log(), if global verbose=True. Otherwise does nothing.
 	"""
 	if verbose:
 		log(*msg)
@@ -115,7 +115,6 @@ class Listener(object):
 	def add_service(self, zeroconf, type, name):
 		info = zeroconf.get_service_info(type, name)
 		if SNAME in name:
-			logv(info)
 			self.ret.append(socket.inet_ntoa(info.address))
 			# This is the same ret object in get_host() below.
 			# It's now a singleton: [address].
@@ -123,15 +122,14 @@ class Listener(object):
 			# and then return the single object inside this list.
 
 def get_host():
-	ret = [] # Gets passed to Listener
+	ret = [] # Singleton that gets passed to Listener
 	zeroconf = Zeroconf()
 	listener = Listener(ret)
 	browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
 	logv("Searching for %s" % SNAME)
 	while len(ret) == 0:
-		time.sleep(1)
-	return ret[0]
-
+		time.sleep(1) # Wait for ret to get filled in by add_service()
+	return ret[0] # Unwrap and return the address
 
 def process_args(argv):
 	# Setup and parse
