@@ -30,6 +30,15 @@ def flash(is_active):
 				GPIO.output(LED,GPIO.LOW) # Turn off LED
 		time.sleep(FLASH_DELAY)
 
+# This is example code from source: http://raspberrypi.stackexchange.com/questions/7088/playing-audio-files-with-python
+# This plays a sound through the raspberrypi audio out
+	import pygame
+	pygame.mixer.init()
+	pygame.mixer.music.load("myFile.wav")
+	pygame.mixer.music.play()
+	while pygame.mixer.music.get_busy() == True:
+	    continue
+
 
 def log(*msg):
 	"""
