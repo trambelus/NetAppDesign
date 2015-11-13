@@ -5,6 +5,8 @@ import ephem 		# for the orbit calculations
 import requests	# to get Celestrak TLEs and NOAA data
 import time			# gets the current date
 
+NOAA_TOKEN_FILE = 'noaa.txt' # access token for NOAA API
+
 # GPIO pin number of LED according to spec; GPIO pin 18 Phys Pin 12
 LED = 12
 FLASH_DELAY = 1 # flash delay in seconds
@@ -53,5 +55,7 @@ def parse_args():
 def get_weather(zipcode):
 	# http://www.ncdc.noaa.gov/cdo-web/api/v2/data?datasetid=GHCND&locationid=ZIP:28801&startdate=2010-05-01&enddate=2010-05-01
 	today = time.strftime('%Y-%m-%d')
-	params = {'datasetid':'GHCND', 'locationid':'ZIP:%05d'%zipcode, 'startdate':today, 'enddate':today}
+	with open(NOAA_TOKEN_FILE) as f:
+		token = f.readlines()[0].strip()
+	params = {'datasetid':'GHCND', 'locationid':'ZIP:%05d'%zipcode, 'startdate':today, 'enddate':today, 'token':token}
 	response = requests.get('http://www.ncdc.noaa.gov/cdo-web/api/v2/data', params=params)
