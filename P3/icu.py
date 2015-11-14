@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
 import argparse	# argument parsing
+import csv			# to convert zip code to lat/long
 import ephem 		# for the orbit calculations
 import requests	# to get Celestrak TLEs and NOAA data
 import time			# gets the current date
+from pprint import pprint # for debugging
 
 try:
 	import RPi.GPIO as GPIO
@@ -11,7 +13,9 @@ try:
 except ImportError:
 	GPIO_AVAILABLE = False
 
-NOAA_TOKEN_FILE = 'noaa.txt' # access token for NOAA API
+LOGFILE = 'icu.log'
+TOKEN_FILE = 'openweathermap.txt' # access token for NOAA API
+ZIPS_FILE = 'zip_code_database.csv' # to convert zip code to lat/long
 
 if GPIO_AVAILABLE:
 	# GPIO pin number of LED according to spec; GPIO pin 18 Phys Pin 12
@@ -56,25 +60,90 @@ def parse_args():
 	parser = argparse.ArgumentParser(
 		prog='ICU',
 		description="Given a zip code and satellite code, generates notifications " +
-		"15 minutes before that satellite will become visible.\n\nSee http://www.celestrak.com/NORAD/elements/stations.txt " +
-		"for a complete list of supported satellites."
+		"15 minutes before that satellite will become visible."
 	)
 	parser.add_argument('-z', dest='zip', type=int, required=True, help="Zip code for which to check viewable events")
 	parser.add_argument('-s', dest='sat', required=True, help="Name of satellite to view")
 	return parser.parse_args()
 
-def get_weather(zipcode):
-	# http://www.ncdc.noaa.gov/cdo-web/api/v2/data?datasetid=GHCND&locationid=ZIP:28801&startdate=2010-05-01&enddate=2010-05-01
-	today = time.strftime('%Y-%m-%d')
-	with open(NOAA_TOKEN_FILE) as f:
+def zip_to_latlong(zipcode):
+	"""
+	Given a zip code, returns a 3-tuple containing location name, latitude, and longitude. All strings.
+	"""
+	csvfile = open(ZIPS_FILE,'r')
+	r = csv.reader(csvfile)
+	loc = [l for l in r if l[0] == str(zipcode)]
+	csvfile.close()
+	if len(loc) == 0:
+		return None
+	loc = loc[0]
+	return (loc[2], loc[9], loc[10])
+
+def get_weather(lat, lon, loc):
+	"""
+	Given a zip code, returns a list of times and Booleans: three-hour increments, true if clear at that time.
+	Uses the OpenWeatherMap API: http://openweathermap.org/api
+	"""
+	with open(TOKEN_FILE) as f:
 		token = f.readlines()[0].strip()
-	params = {'datasetid':'GHCND', 'locationid':'ZIP:%05d'%zipcode, 'startdate':today, 'enddate':today, 'token':token}
-	response = requests.get('http://www.ncdc.noaa.gov/cdo-web/api/v2/data', params=params)
-	return response.text
+	log("Getting weather information for %s: %s, %s" % (loc,lat,lon))
+	params = {'lat':lat,'lon':lon, 'mode':'json', 'appid':token}
+	headers = {'token':token}
+	response = requests.get('http://api.openweathermap.org/data/2.5/forecast', params=params, headers=headers).json()['list']
+	weather = [(response[i]['dt_txt'], response[i]['weather'][0]['main'] == 'Clear') for i in range(len(response))]
+	return weather
+
+def get_tle(sat):
+	"""
+	Given a string describing a satellite, returns its TLE.
+	Uses the Celestrak API (sort of): http://www.celestrak.com/NORAD/elements/visual.txt
+	"""
+	tle_list = [e.strip() for e in requests.get('http://www.celestrak.com/NORAD/elements/visual.txt').text.split('\n')]
+	tle_list = [tle_list[i:i+3] for i in range(0,len(tle_list)-2,3)]
+	matching = list(filter(lambda x: sat.lower() in x[0].lower(), tle_list))
+	if matching == None or len(matching) == 0:
+		return None
+	elif len(matching) > 1:
+		log("Multiple matches found. Select:")
+		print('\n'.join(["[%d]: %s" % (i, matching[i][0]) for i in range(len(matching))]))
+		selected = int(input(' > '))
+		return matching[selected]
+	log("Selected satellite: %s" % matching[0][0])
+	return matching[0]
+
+def is_dark(lat, lon, times):
+	"""
+	Given a list of times, return a list of Booleans: true if it's dark outside at that time.
+	Uses the Sunrise-Sunset API: http://sunrise-sunset.org/api
+	"""
+	dates = {}
+	for tdatetime in times:
+		tdate = tdatetime.split(' ')[0]
+		ttime = tdatetime.split(' ')[1].strip()
+		time.strptime(ttime,'%H:%M:%S')
+		if tdate not in dates:
+			params = {'formatted':'0','lat':lat,'lng':lon,'date':tdate}
+			response = requests.get('http://api.sunrise-sunset.org/json', params=params).json()
+			print(tdate)
+			print(response)
+			dates[tdate] = response
+			time.sleep(1)
 
 def main():
 	args = parse_args()
-	print(get_weather(args.zip))
+	tle = get_tle(args.sat)
+	if tle == None:
+		log("Error: Satellite not found: %s" % args.sat)
+		return
+	tle_c = ephem.readtle(*tle)
+	print(tle_c)
+	[loc, lat, lon] = zip_to_latlong(args.zip)
+	weather = get_weather(lat, lon, loc)
+	if weather == None:
+		log("Error: zip code not found: %s" % args.zip)
+		return
+	darktimes = is_dark(lat, lon, [weather[i][0] for i in range(len(weather))])
+	print('\n'.join(str(weather[i]) for i in range(len(weather))))
 
 if __name__ == '__main__':
 	main()
