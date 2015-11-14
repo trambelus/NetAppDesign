@@ -21,7 +21,7 @@ def show_ip():
 	except KeyError as ex:
 		return ''
 
-@app.route('/pissh/pull')
+@app.route('/pissh/clear')
 def clear_shelf():
 	shelf.clear()
 	return 'List cleared'
