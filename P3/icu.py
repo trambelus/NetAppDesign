@@ -17,6 +17,17 @@ LOGFILE = 'icu.log'
 TOKEN_FILE = 'openweathermap.txt' # access token for NOAA API
 ZIPS_FILE = 'zip_code_database.csv' # to convert zip code to lat/long
 
+<<<<<<< HEAD
+# This is example code from source: http://raspberrypi.stackexchange.com/questions/7088/playing-audio-files-with-python
+# This plays a sound through the raspberrypi audio out
+	import pygame
+	pygame.mixer.init()
+	pygame.mixer.music.load("myFile.wav")
+	pygame.mixer.music.play()
+	while pygame.mixer.music.get_busy() == True:
+	    continue
+
+=======
 if GPIO_AVAILABLE:
 	# GPIO pin number of LED according to spec; GPIO pin 18 Phys Pin 12
 	LED = 12
@@ -43,6 +54,7 @@ if GPIO_AVAILABLE:
 else:
 	def flash(is_active):
 		print("Flashing!")
+>>>>>>> origin/master
 
 def log(*msg):
 	"""
