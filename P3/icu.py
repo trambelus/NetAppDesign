@@ -6,6 +6,9 @@ import ephem 		# for the orbit calculations
 import requests	# to get Celestrak TLEs and NOAA data
 import time			# gets the current date
 from pprint import pprint # for debugging
+from twilio.rest import TwilioRestClient
+import pygame
+
 
 try:
 	import RPi.GPIO as GPIO
@@ -13,6 +16,7 @@ try:
 except ImportError:
 	GPIO_AVAILABLE = False
 
+CLIENT = TwilioRestClient(account='ACe3446369fe6f831be04eae238e9bdfa8', token='67fef0ff1be5813a0a162b22200ae2b7')
 LOGFILE = 'icu.log'
 TOKEN_FILE = 'openweathermap.txt' # access token for NOAA API
 ZIPS_FILE = 'zip_code_database.csv' # to convert zip code to lat/long
@@ -43,6 +47,16 @@ if GPIO_AVAILABLE:
 else:
 	def flash(is_active):
 		print("Flashing!")
+
+def sendMessage():
+	CLIENT.messages.create(to='+15407974693', from_='+15406135061', body="Playing Hello Mister Gopher", media_url="http://www.bassmaster.com/sites/default/files/imagecache/slideshow_image/06DeanRojas_Record.jpg")
+	print('Sent Text Message')
+	pygame.mixer.init()
+	pygame.mixer.music.load("hello_mister_gopher.wav")
+	pygame.mixer.music.play()
+	while pygame.mixer.music.get_busy() == True:
+	    continue
+	print('Finished Playing WAV File')
 
 def log(*msg):
 	"""
