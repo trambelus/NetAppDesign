@@ -1,2 +1,5 @@
 *.log
 P1/oauth.txt
+*.dir
+*.bak
+*.dat

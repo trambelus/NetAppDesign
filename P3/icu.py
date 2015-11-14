@@ -6,6 +6,8 @@ import ephem 		# for the orbit calculations
 import requests	# to get Celestrak TLEs and NOAA data
 import time			# gets the current date
 from pprint import pprint # for debugging
+import shelve
+import calendar
 
 try:
 	import RPi.GPIO as GPIO
@@ -64,11 +66,12 @@ def parse_args():
 	)
 	parser.add_argument('-z', dest='zip', type=int, required=True, help="Zip code for which to check viewable events")
 	parser.add_argument('-s', dest='sat', required=True, help="Name of satellite to view")
+	parser.add_argument('--validation', action='store_true')
 	return parser.parse_args()
 
 def zip_to_latlong(zipcode):
 	"""
-	Given a zip code, returns a 3-tuple containing location name, latitude, and longitude. All strings.
+	Given a zip code, returns a 3-tuple containing location name, latitude, and longitude, all strings.
 	"""
 	csvfile = open(ZIPS_FILE,'r')
 	r = csv.reader(csvfile)
@@ -78,20 +81,6 @@ def zip_to_latlong(zipcode):
 		return None
 	loc = loc[0]
 	return (loc[2], loc[9], loc[10])
-
-def get_weather(lat, lon, loc):
-	"""
-	Given a zip code, returns a list of times and Booleans: three-hour increments, true if clear at that time.
-	Uses the OpenWeatherMap API: http://openweathermap.org/api
-	"""
-	with open(TOKEN_FILE) as f:
-		token = f.readlines()[0].strip()
-	log("Getting weather information for %s: %s, %s" % (loc,lat,lon))
-	params = {'lat':lat,'lon':lon, 'mode':'json', 'appid':token}
-	headers = {'token':token}
-	response = requests.get('http://api.openweathermap.org/data/2.5/forecast', params=params, headers=headers).json()['list']
-	weather = [(response[i]['dt_txt'], response[i]['weather'][0]['main'] == 'Clear') for i in range(len(response))]
-	return weather
 
 def get_tle(sat):
 	"""
@@ -111,39 +100,118 @@ def get_tle(sat):
 	log("Selected satellite: %s" % matching[0][0])
 	return matching[0]
 
-def is_dark(lat, lon, times):
+def is_clear(lat, lon, t_epoch):
 	"""
-	Given a list of times, return a list of Booleans: true if it's dark outside at that time.
+	Given a set of coordinates and a time, returns True if the weather will be clear at that time.
+	Uses a shelf cache to minimize API access.
+	Uses the OpenWeatherMap API: http://openweathermap.org/api
+	"""
+	t_epoch = int(t_epoch) # just in case
+
+	weathershelf = shelve.open('weather')
+
+	if len(weathershelf) != 0:
+		mintime = min([abs(t_epoch - int(wt_epoch)) for wt_epoch in weathershelf.keys() if wt_epoch != 'last-update'])
+
+	if 'last-update' not in weathershelf or \
+		time.mktime(time.localtime()) > (weathershelf['last-update'] + 3*60*60) or \
+		mintime > 3*60*60:
+
+		log("Updating weather cache")
+		with open(TOKEN_FILE) as f:
+			token = f.readlines()[0].strip()
+		params = {'lat':lat,'lon':lon, 'mode':'json', 'appid':token}
+		headers = {'token':token}
+		response = requests.get('http://api.openweathermap.org/data/2.5/forecast', params=params, headers=headers).json()['list']
+		for item in response:
+			weathershelf[str(item['dt'])] = (item['weather'][0]['main'] == 'Clear')
+		weathershelf['last-update'] = time.mktime(time.localtime())
+		weathershelf.sync()
+
+	mintime = min([abs(t_epoch - int(wt_epoch)) for wt_epoch in weathershelf.keys() if wt_epoch != 'last-update'])
+
+	besttime = [wt_epoch for wt_epoch in weathershelf.keys()
+		if wt_epoch != 'last-update' and abs(t_epoch - int(wt_epoch)) == mintime][0]
+
+	is_clear = weathershelf[besttime]
+	weathershelf.close()
+	return is_clear
+
+def is_dark(lat, lon, t_epoch):
+	"""
+	Given a date/time, return a Boolean: true if it's dark outside at that time.
+	Uses a shelf cache to minimize API access.
 	Uses the Sunrise-Sunset API: http://sunrise-sunset.org/api
 	"""
-	dates = {}
-	for tdatetime in times:
-		tdate = tdatetime.split(' ')[0]
-		ttime = tdatetime.split(' ')[1].strip()
-		time.strptime(ttime,'%H:%M:%S')
-		if tdate not in dates:
-			params = {'formatted':'0','lat':lat,'lng':lon,'date':tdate}
-			response = requests.get('http://api.sunrise-sunset.org/json', params=params).json()
-			print(tdate)
-			print(response)
-			dates[tdate] = response
-			time.sleep(1)
+	t_datetime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(t_epoch))
+	t_date = t_datetime.split(' ')[0]
+	t_time = t_datetime.split(' ')[1].strip()
+	time.strptime(t_time,'%H:%M:%S')
+	darkshelf = shelve.open('dark')
+	#darkshelf.clear()
+	if t_date not in darkshelf:
+		log("Updating sunset cache")
+		params = {'formatted':'0','lat':lat,'lng':lon,'date':t_date}
+		response = requests.get('http://api.sunrise-sunset.org/json', params=params).json()
+		darkshelf[t_date] = response
+	dark = darkshelf[t_date]['results']
+	darkshelf.close()
+	print(dark)
+	sunrise = calendar.timegm(time.strptime(dark['sunrise'], "%Y-%m-%dT%H:%M:%S+00:00"))
+	sunset = calendar.timegm(time.strptime(dark['sunset'], "%Y-%m-%dT%H:%M:%S+00:00"))
+	isdark = t_epoch < sunrise-60*60 or t_epoch > sunset+60*60
+	return isdark
+
+def get_transit_times(sat, observer, ts_epoch):
+	"""
+	Given a pyephem satellite, pyephem observer, and array of epoch times,
+	return a set of all the transit times for that satellite from that observer
+	on each of the days containing the times in the given array.
+	"""
+	print("given datetimes:", ts_epoch)
+	transits = set()
+	for t_epoch in ts_epoch:
+		t_datetime = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime(t_epoch))
+		print("Checking date: %s" % t_datetime)
+		observer.date = t_datetime
+		sat.compute(observer)
+		transits.add(observer.next_pass(sat))
+	ret = list(transits)
+	ret.sort()
+	print(ret)
+	return ret
 
 def main():
 	args = parse_args()
+
+	# Zip to lat/long
+	[loc, lat, lon] = zip_to_latlong(args.zip)
+	log("Getting information for %s: %s, %s" % (loc,lat,lon))
+
+	# ephem stuff
+	observer = ephem.Observer()
+	observer.lat, observer.lon = lat, lon
 	tle = get_tle(args.sat)
 	if tle == None:
 		log("Error: Satellite not found: %s" % args.sat)
 		return
-	tle_c = ephem.readtle(*tle)
-	print(tle_c)
-	[loc, lat, lon] = zip_to_latlong(args.zip)
-	weather = get_weather(lat, lon, loc)
-	if weather == None:
-		log("Error: zip code not found: %s" % args.zip)
-		return
-	darktimes = is_dark(lat, lon, [weather[i][0] for i in range(len(weather))])
-	print('\n'.join(str(weather[i]) for i in range(len(weather))))
+	sat = ephem.readtle(*tle)
+
+	# Calculate a range of times and iterate
+	todaystart = time.mktime(time.localtime())//86400*86400
+	times = [todaystart + 60*hour + 86400*day for day in range(5) for hour in range(24)]
+
+	for t_epoch in get_transit_times(sat, observer, times):
+		# for each: is it clear? is it dark?
+		#clear = is_clear(lat, lon, t_epoch)
+		if clear == None:
+			log("Error: zip code not found: %s" % args.zip)
+			return
+		#dark = is_dark(lat, lon, t_epoch)
+		if clear and dark:
+			alert()
 
 if __name__ == '__main__':
+	# print(is_dark('37.2','-80.4',1447537740))
+	# print(is_clear('37.2','-80.4',1447537740))
 	main()
