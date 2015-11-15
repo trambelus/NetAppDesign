@@ -9,7 +9,11 @@ from pprint import pprint # for debugging
 import shelve
 import calendar
 from twilio.rest import TwilioRestClient
-import pygame
+
+try:
+	import pygame
+except ImportError:
+	pass
 
 try:
 	import RPi.GPIO as GPIO
@@ -21,6 +25,10 @@ CLIENT = TwilioRestClient(account='ACe3446369fe6f831be04eae238e9bdfa8', token='6
 LOGFILE = 'icu.log'
 TOKEN_FILE = 'openweathermap.txt' # access token for NOAA API
 ZIPS_FILE = 'zip_code_database.csv' # to convert zip code to lat/long
+
+SUN_MIN_ALT = -0.4363319 # about -25 degrees
+SUN_MAX_ALT = -0.1745327 # about -10 degrees
+SAT_MIN_ALT =  0.4363319 # about +25 degrees
 
 if GPIO_AVAILABLE:
 	# GPIO pin number of LED according to spec; GPIO pin 18 Phys Pin 12
@@ -113,67 +121,47 @@ def get_tle(sat):
 	log("Selected satellite: %s" % matching[0][0])
 	return matching[0]
 
-def is_clear(lat, lon, t_epoch):
+def is_clear(lat, lon, t_date):
 	"""
 	Given a set of coordinates and a time, returns True if the weather will be clear at that time.
 	Uses a shelf cache to minimize API access.
 	Uses the OpenWeatherMap API: http://openweathermap.org/api
 	"""
-	t_epoch = int(t_epoch) # just in case
 
 	weathershelf = shelve.open('weather')
 
-	if len(weathershelf) != 0:
-		mintime = min([abs(t_epoch - int(wt_epoch)) for wt_epoch in weathershelf.keys() if wt_epoch != 'last-update'])
-
+	# if it's an empty shelf or it hasn't been updated in at least 3 hours or there's no weather data for this date:
 	if 'last-update' not in weathershelf or \
 		time.mktime(time.localtime()) > (weathershelf['last-update'] + 3*60*60) or \
-		mintime > 3*60*60:
+		t_date not in weathershelf:
 
 		log("Updating weather cache")
 		with open(TOKEN_FILE) as f:
 			token = f.readlines()[0].strip()
-		params = {'lat':lat,'lon':lon, 'mode':'json', 'appid':token}
+		params = {'lat':lat,'lon':lon, 'mode':'json', 'appid':token, 'cnt':'16'}
 		headers = {'token':token}
-		response = requests.get('http://api.openweathermap.org/data/2.5/forecast', params=params, headers=headers).json()['list']
+		response = requests.get('http://api.openweathermap.org/data/2.5/forecast/daily', params=params, headers=headers).json()['list']
 		for item in response:
-			weathershelf[str(item['dt'])] = (item['weather'][0]['main'] == 'Clear')
+			i_date = time.strftime('%Y/%m/%d', time.localtime(item['dt']))
+			weathershelf[i_date] = item['weather'][0]['main'] == 'Clear'
 		weathershelf['last-update'] = time.mktime(time.localtime())
 		weathershelf.sync()
 
-	mintime = min([abs(t_epoch - int(wt_epoch)) for wt_epoch in weathershelf.keys() if wt_epoch != 'last-update'])
-
-	besttime = [wt_epoch for wt_epoch in weathershelf.keys()
-		if wt_epoch != 'last-update' and abs(t_epoch - int(wt_epoch)) == mintime][0]
-
-	is_clear = weathershelf[besttime]
+	is_clear = weathershelf[t_date]
 	weathershelf.close()
 	return is_clear
 
-def is_dark(lat, lon, t_epoch):
+def sun_position_right(obs):
 	"""
-	Given a date/time, return a Boolean: true if it's dark outside at that time.
-	Uses a shelf cache to minimize API access.
-	Uses the Sunrise-Sunset API: http://sunrise-sunset.org/api
+	Given an observer, return a Boolean: true if the sun is in the right spot at that time.
 	"""
-	t_datetime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(t_epoch))
-	t_date = t_datetime.split(' ')[0]
-	t_time = t_datetime.split(' ')[1].strip()
-	time.strptime(t_time,'%H:%M:%S')
-	darkshelf = shelve.open('dark')
-	#darkshelf.clear()
-	if t_date not in darkshelf:
-		log("Updating sunset cache")
-		params = {'formatted':'0','lat':lat,'lng':lon,'date':t_date}
-		response = requests.get('http://api.sunrise-sunset.org/json', params=params).json()
-		darkshelf[t_date] = response
-	dark = darkshelf[t_date]['results']
-	darkshelf.close()
-	print(dark)
-	sunrise = calendar.timegm(time.strptime(dark['sunrise'], "%Y-%m-%dT%H:%M:%S+00:00"))
-	sunset = calendar.timegm(time.strptime(dark['sunset'], "%Y-%m-%dT%H:%M:%S+00:00"))
-	isdark = t_epoch < sunrise-60*60 or t_epoch > sunset+60*60
-	return isdark
+	sun = ephem.Sun()
+	sun.compute(obs)
+	dark = (obs.next_rising(sun) < obs.next_setting(sun) \
+		and obs.next_rising(sun) - obs.date > 1/24 \
+		and obs.date - obs.previous_setting(sun) > 1/24)
+	position = sun.alt > SUN_MIN_ALT and sun.alt < SUN_MAX_ALT
+	return dark and position
 
 def get_transit_times(sat, observer, ts_epoch):
 	"""
@@ -181,17 +169,18 @@ def get_transit_times(sat, observer, ts_epoch):
 	return a set of all the transit times for that satellite from that observer
 	on each of the days containing the times in the given array.
 	"""
-	print("given datetimes:", ts_epoch)
+	#print("given datetimes:", ts_epoch)
 	transits = set()
 	for t_epoch in ts_epoch:
 		t_datetime = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime(t_epoch))
-		print("Checking date: %s" % t_datetime)
+		#print("Checking date: %s" % t_datetime)
 		observer.date = t_datetime
 		sat.compute(observer)
-		transits.add(observer.next_pass(sat))
+		nextpass = observer.next_pass(sat)[2:4]
+		if nextpass[1] > SAT_MIN_ALT: # it's high enough!
+			transits.add(str(nextpass[0]))
 	ret = list(transits)
 	ret.sort()
-	print(ret)
 	return ret
 
 def main():
@@ -211,18 +200,15 @@ def main():
 	sat = ephem.readtle(*tle)
 
 	# Calculate a range of times and iterate
-	todaystart = time.mktime(time.localtime())//86400*86400
-	times = [todaystart + 60*hour + 86400*day for day in range(5) for hour in range(24)]
+	times = [time.time() + 60*60*hour + 86400*day for day in range(16) for hour in range(24)]
 
-	for t_epoch in get_transit_times(sat, observer, times):
+	for t_datetime in get_transit_times(sat, observer, times):
 		# for each: is it clear? is it dark?
-		#clear = is_clear(lat, lon, t_epoch)
-		if clear == None:
-			log("Error: zip code not found: %s" % args.zip)
-			return
-		#dark = is_dark(lat, lon, t_epoch)
-		if clear and dark:
-			alert()
+		observer.date = t_datetime
+		t_date = t_datetime.split(' ')[0]
+		sun = sun_position_right(observer)
+		clear = is_clear(lat, lon, t_date)
+		print("%s: sun:%s, clear:%s" % (t_datetime, sun, clear))
 
 if __name__ == '__main__':
 	# print(is_dark('37.2','-80.4',1447537740))
