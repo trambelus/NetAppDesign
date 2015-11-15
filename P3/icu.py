@@ -57,15 +57,24 @@ else:
 	def flash(is_active):
 		print("Flashing!")
 
-def sendMessage():
+#This funciton sends a text message using Twilio
+def sendTextMessage():
 	CLIENT.messages.create(to='+15407974693', from_='+15406135061', body="Playing Hello Mister Gopher", media_url="http://www.bassmaster.com/sites/default/files/imagecache/slideshow_image/06DeanRojas_Record.jpg")
-	print('Sent Text Message')
-	pygame.mixer.init()
-	pygame.mixer.music.load("hello_mister_gopher.wav")
-	pygame.mixer.music.play()
-	while pygame.mixer.music.get_busy() == True:
-	    continue
-	print('Finished Playing WAV File')
+	print('Sent Text Message!')
+
+# This function plays a sound through the audio port of the raspberry pi
+def playSound(is_active):
+	while True:
+		pygame.mixer.init()
+		pygame.mixer.music.load("hello_mister_gopher.wav")
+		if len(is_active) == 0:
+			pygame.mixer.music.stop();
+		if is_active[0]:
+			print('Sounding Alert!')
+			pygame.mixer.music.play()
+			while pygame.mixer.music.get_busy() == True:
+	    		continue
+	    time.sleep(FLASH_DELAY)
 
 def log(*msg):
 	"""
@@ -200,7 +209,12 @@ def main():
 	sat = ephem.readtle(*tle)
 
 	# Calculate a range of times and iterate
+<<<<<<< HEAD
 	times = [time.time() + 60*60*hour + 86400*day for day in range(16) for hour in range(24)]
+=======
+	todaystart = time.mktime(time.localtime())//86400*86400
+	times = [todaystart + 3600*hour + 86400*day for day in range(5) for hour in range(24)]
+>>>>>>> ba03f2208a5e272b3d054982d080384aa12d618c
 
 	for t_datetime in get_transit_times(sat, observer, times):
 		# for each: is it clear? is it dark?
