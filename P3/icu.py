@@ -9,6 +9,7 @@ from pprint import pprint # for debugging
 import shelve
 import calendar
 from twilio.rest import TwilioRestClient
+from threading import Thread
 
 try:
 	import pygame
@@ -29,6 +30,8 @@ ZIPS_FILE = 'zip_code_database.csv' # to convert zip code to lat/long
 SUN_MIN_ALT = -0.4363319 # about -25 degrees
 SUN_MAX_ALT = -0.1745327 # about -10 degrees
 SAT_MIN_ALT =  0.4363319 # about +25 degrees
+
+R2D = 180/3.14159265
 
 if GPIO_AVAILABLE:
 	# GPIO pin number of LED according to spec; GPIO pin 18 Phys Pin 12
@@ -95,9 +98,13 @@ def parse_args():
 		"15 minutes before that satellite will become visible."
 	)
 	parser.add_argument('-z', dest='zip', type=int, required=True, help="Zip code for which to check viewable events")
-	parser.add_argument('-s', dest='sat', required=True, help="Name of satellite to view")
-	parser.add_argument('--validation', action='store_true')
-	return parser.parse_args()
+	parser.add_argument('-s', dest='sat_id', help="NORAD ID of satellite to view")
+	parser.add_argument('-n', dest='sat_str', help="Name of satellite to view")
+	parser.add_argument('-v', dest='verbose', action='store_true')
+	args = parser.parse_args()
+	if not (args.sat_id or args.sat_str):
+		parser.error("Either -s or -n is required")
+	return args
 
 def zip_to_latlong(zipcode):
 	"""
@@ -112,14 +119,14 @@ def zip_to_latlong(zipcode):
 	loc = loc[0]
 	return (loc[2], loc[9], loc[10])
 
-def get_tle(sat):
+def get_tle_from_str(sat_str):
 	"""
 	Given a string describing a satellite, returns its TLE.
 	Uses the Celestrak API (sort of): http://www.celestrak.com/NORAD/elements/visual.txt
 	"""
 	tle_list = [e.strip() for e in requests.get('http://www.celestrak.com/NORAD/elements/visual.txt').text.split('\n')]
 	tle_list = [tle_list[i:i+3] for i in range(0,len(tle_list)-2,3)]
-	matching = list(filter(lambda x: sat.lower() in x[0].lower(), tle_list))
+	matching = list(filter(lambda x: sat_str.lower() in x[0].lower(), tle_list))
 	if matching == None or len(matching) == 0:
 		return None
 	elif len(matching) > 1:
@@ -130,9 +137,23 @@ def get_tle(sat):
 	log("Selected satellite: %s" % matching[0][0])
 	return matching[0]
 
+def get_tle_from_norad(sat_id):
+	"""
+	Given a NORAD id, returns a TLE.
+	Uses this random website we found: http://www.n2yo.com/satellite
+	Also uses some ugly ugly web scraping, please don't look.
+	"""
+	html = requests.get('http://www.n2yo.com/satellite/?s=%s' % str(sat_id)).text
+	div_loc = html.find('<div id="tle">')
+	if div_loc == -1:
+		return None
+	tle = [str(sat_id)].extend(html[div_loc+23:html.find('</div>',div_loc)-70].split('\r\n'))
+	print(tle)
+	return tle
+
 def is_clear(lat, lon, t_date):
 	"""
-	Given a set of coordinates and a time, returns True if the weather will be clear at that time.
+	Given a set of coordinates and a date/time, returns True if the weather will be clear at that time.
 	Uses a shelf cache to minimize API access.
 	Uses the OpenWeatherMap API: http://openweathermap.org/api
 	"""
@@ -147,19 +168,26 @@ def is_clear(lat, lon, t_date):
 		log("Updating weather cache")
 		with open(TOKEN_FILE) as f:
 			token = f.readlines()[0].strip()
+
 		params = {'lat':lat,'lon':lon, 'mode':'json', 'appid':token, 'cnt':'16'}
 		headers = {'token':token}
 		response = requests.get('http://api.openweathermap.org/data/2.5/forecast/daily', params=params, headers=headers).json()['list']
 		for item in response:
 			#print("Adding %s to weathershelf" % time.strftime('%Y/%m/%d', time.localtime(item['dt'])))
 			i_date = time.strftime('%Y/%m/%d', time.localtime(item['dt']))
+			#print(i_date)
 			weathershelf[i_date] = item['weather'][0]['main'] == 'Clear'
+
 		weathershelf['last-update'] = time.mktime(time.localtime())
 		weathershelf.sync()
 
-	is_clear = weathershelf[t_date]
+	try:
+		isclear = weathershelf[t_date]
+	except KeyError:
+		return None
+
 	weathershelf.close()
-	return is_clear
+	return isclear
 
 def sun_position_right(obs, t_date):
 	"""
@@ -170,20 +198,24 @@ def sun_position_right(obs, t_date):
 	# print("At %s: next rise is %sh away, previous set is %sh away, next set is %sh away" % 
 	# 	(obs.date, round(24*(obs.next_rising(sun)-obs.date),2),round(24*(obs.date-obs.previous_setting(sun)),2),
 	# 		round(24*(obs.next_setting(sun)-obs.date),2)))
-	#print("%s" % obs.date)
-	#print("next rise: %s, %s" % (obs.next_rising(sun), obs.next_rising(sun) - obs.date > 1/24))
-	#print("next set: %s" % obs.next_setting(sun))
-	#print("previous set: %s, %s" % (obs.previous_setting(sun), obs.date - obs.previous_setting(sun) > 1/24))
-	dark = (obs.next_rising(sun) < obs.next_setting(sun)) \
-		and (obs.next_rising(sun) - obs.date > 1/24) \
-		and (obs.date - obs.previous_setting(sun) > 1/24)
+	# print("%s" % obs.date)
+	# print("next rise: %s, %s" % (obs.next_rising(sun), obs.next_rising(sun) - obs.date > 1/24))
+	# print("next set: %s, night=%s" % (obs.next_setting(sun), obs.next_rising(sun) < obs.next_setting(sun)))
+	# print("previous set: %s, %s" % (obs.previous_setting(sun), obs.date - obs.previous_setting(sun) > 1/24))
+
+	isn = (obs.next_rising(sun) < obs.next_setting(sun)) 	# is night
+	tcr = (obs.next_rising(sun) - obs.date > 1/24) 			# too close to rise
+	tcs = (obs.date - obs.previous_setting(sun) > 1/24) 	# too close to set
+
 	obs.date = t_date
 	sun.compute(obs)
-	#print("sun position: %f deg" % (sun.alt*180/3.14159))
-	position = sun.alt > SUN_MIN_ALT and sun.alt < SUN_MAX_ALT
-	#print("position: %s" % position)
-	#print("\t\tVISIBLE: %s" % (dark and position))
-	return dark and position
+	pos = sun.alt > SUN_MIN_ALT and sun.alt < SUN_MAX_ALT # sun pos right
+	# print(" %s" % obs.date)
+	# print("sun position: %f deg" % (sun.alt*R2D))
+	# print("sun azimuth:  %f deg" % (sun.az*R2D))
+	# print("position: %s" % position)
+	# print("\t\tVISIBLE: %s" % (dark and position))
+	return (isn and tcr and tcs, pos)
 
 def get_transit_times(sat, observer, ts_epoch):
 	"""
@@ -192,18 +224,37 @@ def get_transit_times(sat, observer, ts_epoch):
 	on each of the days containing the times in the given array.
 	"""
 	#print("given datetimes:", ts_epoch)
-	transits = set()
+	transits = []
+	times = []
 	for t_epoch in ts_epoch:
 		t_datetime = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime(t_epoch))
 		#print("Checking date: %s" % t_datetime)
 		observer.date = t_datetime
 		sat.compute(observer)
-		nextpass = observer.next_pass(sat)[2:4]
-		if nextpass[1] > SAT_MIN_ALT: # it's high enough!
-			transits.add(str(nextpass[0]))
+		nextpass = observer.next_pass(sat)
+		if not str(nextpass[2]) in times:
+			transits.append(nextpass)
+			times.append(str(nextpass[2]))
+
 	ret = list(transits)
-	ret.sort()
+	ret = sorted(ret, key=lambda s: s[2])
 	return ret
+
+def wait_for_transit(t_datetime, transit_info):
+	t_epoch = calendar.timegm(time.strptime(t_datetime, "%Y/%m/%d %H:%M:%S"))
+	# Wait for 15 minutes before
+	while time.time() + 15*60 < t_epoch:
+		time.sleep(5)
+	# Send text, turn on all the stuff
+	is_active = [True]
+	Thread(target=flash, args=(is_active,)).start()
+	Thread(target=playSound, args=(is_active,)).start()
+	sendTextMessage(transit_info)
+	# Wait for 5 minutes before
+	while time.time() + 5*60 < t_epoch:
+		time.sleep(5)
+	# Stop all the stuff
+	is_active.clear()
 
 def main():
 	args = parse_args()
@@ -215,24 +266,58 @@ def main():
 	# ephem stuff
 	observer = ephem.Observer()
 	observer.lat, observer.lon = lat, lon
-	tle = get_tle(args.sat)
-	if tle == None:
-		log("Error: Satellite not found: %s" % args.sat)
-		return
+
+	if args.sat_str:
+		tle = get_tle_from_str(args.sat_str)
+		if tle == None:
+			log("Error: Satellite name not found: %s" % args.sat_str)
+			return
+	elif args.sat_id:
+		tle = get_tle_from_norad(args.sat_id)
+		if tle == None:
+			log("Error: Satellite with ID %s not found" % args.sat_id)
+			return
+
 	sat = ephem.readtle(*tle)
 
 	# Calculate a range of times and iterate
 	times = [time.time() + 60*60*hour + 24*60*60*day for day in range(15) for hour in range(24)]
+	transits = []
+	i = 0
 
-	for t_datetime in get_transit_times(sat, observer, times):
+	for [s_t, s_az, pk_datetime, pk_alt, e_t, e_az] in get_transit_times(sat, observer, times):
 		# for each: is it clear? is it dark?
-		observer.date = t_datetime
-		t_date = t_datetime.split(' ')[0]
-		sun = sun_position_right(observer, t_date)
+		i += 1
+		observer.date = pk_datetime
+		t_date = str(pk_datetime).split(' ')[0]
+		(dark, pos) = sun_position_right(observer, pk_datetime)
 		clear = is_clear(lat, lon, t_date)
-		visible = sun and clear
-		
+
+		if clear == None:
+			continue
+		sathigh = pk_alt > SAT_MIN_ALT
+		#print("%s: sun=%s, clear=%s" % (pk_datetime, sun, clear))
+		transits.append((dark, pos, clear, sathigh, "%s peak at %d°, start az %d°, end az %d°" % (pk_datetime, pk_alt*R2D, s_az*R2D, e_az*R2D)))
 		#print("%s: sun:%s, clear:%s" % (t_datetime, sun, clear))
+	print("\n")
+	print('\n'.join([p[-1] for p in transits if all(p[:-1])][:5]))
+
+	if args.verbose:
+		print("\nRejected:")
+
+		def reason(t):
+			reasons = []
+			if not t[0]:
+				reasons.append("not dark enough")
+			if not t[1]:
+				reasons.append("sun in wrong position")
+			if not t[2]:
+				reasons.append("not clear enough")
+			if not t[3]:
+				reasons.append("satellite not high enough")
+			return ', '.join(reasons)
+
+		print('\n'.join(["%s \n\t(%s)" % (t[-1],reason(t)) for t in transits if not all(t[:-1])]))
 
 if __name__ == '__main__':
 	# print(is_dark('37.2','-80.4',1447537740))
