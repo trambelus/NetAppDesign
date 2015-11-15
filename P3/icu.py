@@ -58,13 +58,13 @@ if GPIO_AVAILABLE:
 			time.sleep(FLASH_DELAY)
 else:
 	def flash(is_active):
-		print("Flashing!")
+		log("Flashing!")
 
 #This funciton sends a text message using Twilio
-def sendTextMessage(satID, azimuth):
-	textMessage = 'NORAD ID: %d will be visible in 15 minutes!\nAzimuth = %d' % (satID,azimuth)
+def sendTextMessage(sat, transit_info):
+	textMessage = "Satellite '%d' will be visible in 15 minutes!\nTransit at %s" % (sat, transit_info)
 	CLIENT.messages.create(to='+15407974693', from_='+15406135061', body=textMessage)
-	print('Sent Text Message!')
+	log('Sent Text Message!')
 
 # This function plays a sound through the audio port of the raspberry pi
 def playSound(is_active):
@@ -74,7 +74,7 @@ def playSound(is_active):
 		if len(is_active) == 0:
 			pygame.mixer.music.stop();
 		if is_active[0]:
-			print('Sounding Alert!')
+			log('Sounding Alert!')
 			pygame.mixer.music.play()
 			while pygame.mixer.music.get_busy() == True:
 				continue
@@ -241,16 +241,24 @@ def get_transit_times(sat, observer, ts_epoch):
 	ret = sorted(ret, key=lambda s: s[2])
 	return ret
 
-def wait_for_transit(t_datetime, transit_info):
+def wait_for_transit(t_datetime, sat, transit_info):
+	"""
+	Given a datetime (yyyy/mm/dd hh:mm:ss), satellite identifier, and info string,
+	wait until 15 minutes before the datetime and do all the alert stuff.
+	The text message will contain the info string and satellite identifier (string or NORAD ID, whatever).
+	The LEDs will flash (if this is running on a Pi) and a sound will loop.
+	"""
 	t_epoch = calendar.timegm(time.strptime(t_datetime, "%Y/%m/%d %H:%M:%S"))
 	# Wait for 15 minutes before
+	log("Alerting 15 minutes before %s UTC" % t_datetime)
+	log("Sleeping for %d seconds" % (t_epoch - (time.time() + 15*60)))
 	while time.time() + 15*60 < t_epoch:
 		time.sleep(5)
 	# Send text, turn on all the stuff
 	is_active = [True]
 	Thread(target=flash, args=(is_active,)).start()
 	Thread(target=playSound, args=(is_active,)).start()
-	sendTextMessage(transit_info)
+	sendTextMessage(sat, transit_info)
 	# Wait for 5 minutes before
 	while time.time() + 5*60 < t_epoch:
 		time.sleep(5)
@@ -270,11 +278,13 @@ def main():
 
 	if args.sat_str:
 		tle = get_tle_from_str(args.sat_str)
+		args.sat = args.sat_str
 		if tle == None:
 			log("Error: Satellite name not found: %s" % args.sat_str)
 			return
 	elif args.sat_id:
 		tle = get_tle_from_norad(args.sat_id)
+		args.sat = args.sat_id
 		if tle == None:
 			log("Error: Satellite with ID %s not found" % args.sat_id)
 			return
@@ -301,7 +311,8 @@ def main():
 		transits.append((dark, pos, clear, sathigh, "%s peak at %d°, start az %d°, end az %d°" % (pk_datetime, pk_alt*R2D, s_az*R2D, e_az*R2D)))
 		#print("%s: sun:%s, clear:%s" % (t_datetime, sun, clear))
 	print("\n")
-	print('\n'.join([p[-1] for p in transits if all(p[:-1])][:5]))
+	selected_transits = [t[-1] for t in transits if all(t[:-1])][:5]
+	print('\n'.join(selected_transits))
 
 	if args.verbose:
 		print("\nRejected:")
@@ -319,6 +330,8 @@ def main():
 			return ', '.join(reasons)
 
 		print('\n'.join(["%s \n\t(%s)" % (t[-1],reason(t)) for t in transits if not all(t[:-1])]))
+
+	wait_for_transit(' '.join(selected_transits[0].split(' ')[:2]), args.sat, selected_transits[0])
 
 if __name__ == '__main__':
 	# print(is_dark('37.2','-80.4',1447537740))
