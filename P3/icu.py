@@ -140,9 +140,9 @@ def is_clear(lat, lon, t_date):
 	weathershelf = shelve.open('weather')
 
 	# if it's an empty shelf or it hasn't been updated in at least 3 hours or there's no weather data for this date:
-	if 'last-update' not in weathershelf or \
-		time.mktime(time.localtime()) > (weathershelf['last-update'] + 3*60*60) or \
-		t_date not in weathershelf:
+	if ('last-update' not in weathershelf) or \
+		(time.mktime(time.localtime()) > (weathershelf['last-update'] + 3*60*60)) or \
+		(t_date not in weathershelf):
 
 		log("Updating weather cache")
 		with open(TOKEN_FILE) as f:
@@ -151,6 +151,7 @@ def is_clear(lat, lon, t_date):
 		headers = {'token':token}
 		response = requests.get('http://api.openweathermap.org/data/2.5/forecast/daily', params=params, headers=headers).json()['list']
 		for item in response:
+			#print("Adding %s to weathershelf" % time.strftime('%Y/%m/%d', time.localtime(item['dt'])))
 			i_date = time.strftime('%Y/%m/%d', time.localtime(item['dt']))
 			weathershelf[i_date] = item['weather'][0]['main'] == 'Clear'
 		weathershelf['last-update'] = time.mktime(time.localtime())
@@ -160,17 +161,28 @@ def is_clear(lat, lon, t_date):
 	weathershelf.close()
 	return is_clear
 
-def sun_position_right(obs):
+def sun_position_right(obs, t_date):
 	"""
 	Given an observer, return a Boolean: true if the sun is in the right spot at that time.
 	"""
 	sun = ephem.Sun()
 	sun.compute(obs)
-	print("At %s: next rise is %s away, previous set is %s away" % (obs.date, obs.next_rising(sun)-obs.date,obs.date-obs.previous_setting(sun)))
-	dark = (obs.next_rising(sun) < obs.next_setting(sun) \
-		and obs.next_rising(sun) - obs.date > 1/24 \
-		and obs.date - obs.previous_setting(sun) > 1/24)
+	# print("At %s: next rise is %sh away, previous set is %sh away, next set is %sh away" % 
+	# 	(obs.date, round(24*(obs.next_rising(sun)-obs.date),2),round(24*(obs.date-obs.previous_setting(sun)),2),
+	# 		round(24*(obs.next_setting(sun)-obs.date),2)))
+	#print("%s" % obs.date)
+	#print("next rise: %s, %s" % (obs.next_rising(sun), obs.next_rising(sun) - obs.date > 1/24))
+	#print("next set: %s" % obs.next_setting(sun))
+	#print("previous set: %s, %s" % (obs.previous_setting(sun), obs.date - obs.previous_setting(sun) > 1/24))
+	dark = (obs.next_rising(sun) < obs.next_setting(sun)) \
+		and (obs.next_rising(sun) - obs.date > 1/24) \
+		and (obs.date - obs.previous_setting(sun) > 1/24)
+	obs.date = t_date
+	sun.compute(obs)
+	#print("sun position: %f deg" % (sun.alt*180/3.14159))
 	position = sun.alt > SUN_MIN_ALT and sun.alt < SUN_MAX_ALT
+	#print("position: %s" % position)
+	#print("\t\tVISIBLE: %s" % (dark and position))
 	return dark and position
 
 def get_transit_times(sat, observer, ts_epoch):
@@ -210,15 +222,17 @@ def main():
 	sat = ephem.readtle(*tle)
 
 	# Calculate a range of times and iterate
-	times = [time.time() + 60*60*hour + 86400*day for day in range(16) for hour in range(24)]
+	times = [time.time() + 60*60*hour + 24*60*60*day for day in range(15) for hour in range(24)]
 
 	for t_datetime in get_transit_times(sat, observer, times):
 		# for each: is it clear? is it dark?
 		observer.date = t_datetime
 		t_date = t_datetime.split(' ')[0]
-		sun = sun_position_right(observer)
+		sun = sun_position_right(observer, t_date)
 		clear = is_clear(lat, lon, t_date)
-		print("%s: sun:%s, clear:%s" % (t_datetime, sun, clear))
+		visible = sun and clear
+		
+		#print("%s: sun:%s, clear:%s" % (t_datetime, sun, clear))
 
 if __name__ == '__main__':
 	# print(is_dark('37.2','-80.4',1447537740))
