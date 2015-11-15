@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# coding=UTF-8
 
 import argparse	# argument parsing
 import csv			# to convert zip code to lat/long
