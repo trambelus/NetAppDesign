@@ -61,8 +61,9 @@ else:
 		print("Flashing!")
 
 #This funciton sends a text message using Twilio
-def sendTextMessage():
-	CLIENT.messages.create(to='+15407974693', from_='+15406135061', body="Playing Hello Mister Gopher", media_url="http://www.bassmaster.com/sites/default/files/imagecache/slideshow_image/06DeanRojas_Record.jpg")
+def sendTextMessage(satID, azimuth):
+	textMessage = 'NORAD ID: %d will be visible in 15 minutes!\nAzimuth = %d' % (satID,azimuth)
+	CLIENT.messages.create(to='+15407974693', from_='+15406135061', body=textMessage)
 	print('Sent Text Message!')
 
 # This function plays a sound through the audio port of the raspberry pi
