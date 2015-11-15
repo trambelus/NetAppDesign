@@ -73,8 +73,8 @@ def playSound(is_active):
 			print('Sounding Alert!')
 			pygame.mixer.music.play()
 			while pygame.mixer.music.get_busy() == True:
-	    		continue
-	    time.sleep(FLASH_DELAY)
+				continue
+			time.sleep(FLASH_DELAY)
 
 def log(*msg):
 	"""
@@ -166,6 +166,7 @@ def sun_position_right(obs):
 	"""
 	sun = ephem.Sun()
 	sun.compute(obs)
+	print("At %s: next rise is %s away, previous set is %s away" % (obs.date, obs.next_rising(sun)-obs.date,obs.date-obs.previous_setting(sun)))
 	dark = (obs.next_rising(sun) < obs.next_setting(sun) \
 		and obs.next_rising(sun) - obs.date > 1/24 \
 		and obs.date - obs.previous_setting(sun) > 1/24)
@@ -209,12 +210,7 @@ def main():
 	sat = ephem.readtle(*tle)
 
 	# Calculate a range of times and iterate
-<<<<<<< HEAD
 	times = [time.time() + 60*60*hour + 86400*day for day in range(16) for hour in range(24)]
-=======
-	todaystart = time.mktime(time.localtime())//86400*86400
-	times = [todaystart + 3600*hour + 86400*day for day in range(5) for hour in range(24)]
->>>>>>> ba03f2208a5e272b3d054982d080384aa12d618c
 
 	for t_datetime in get_transit_times(sat, observer, times):
 		# for each: is it clear? is it dark?
