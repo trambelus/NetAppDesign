@@ -333,7 +333,10 @@ def main():
 
 		print('\n'.join(["%s \n\t(%s)" % (t[-1],reason(t)) for t in transits if not all(t[:-1])]))
 
-	wait_for_transit(' '.join(selected_transits[0].split(' ')[:2]), args.sat, selected_transits[0])
+	if len(selected_transits) > 0:
+		wait_for_transit(' '.join(selected_transits[0].split(' ')[:2]), args.sat, selected_transits[0])
+	else:
+		log("No transits to wait for; exiting now")
 
 if __name__ == '__main__':
 	# print(is_dark('37.2','-80.4',1447537740))
