@@ -147,11 +147,13 @@ def get_tle_from_norad(sat_id):
 	Also uses some ugly ugly web scraping, please don't look.
 	"""
 	html = requests.get('http://www.n2yo.com/satellite/?s=%s' % str(sat_id)).text
+	#print(html[:100])
 	div_loc = html.find('<div id="tle">')
+	#print(div_loc)
 	if div_loc == -1:
 		return None
-	tle = [str(sat_id)].extend(html[div_loc+23:html.find('</div>',div_loc)-70].split('\r\n'))
-	print(tle)
+	tle = [str(sat_id)]
+	tle.extend(html[div_loc+23:html.find('</div>',div_loc)-70].split('\r\n'))
 	return tle
 
 def is_clear(lat, lon, t_date):
