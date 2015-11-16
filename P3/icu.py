@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 # coding=UTF-8
 
+# Created by: John McDouall; Chris Cox
+# Project 3
+# ECE 4564
+# Description: Created a satellite tracker on the raspberrypiII that is connected to a breadboard via gpio pins
+# When a satellite is visible(weather, sunlight, elevation angle) then the PI sends out alerts via GPIO pins, audio jack, and sends a text message
+# 15 minutes before an event is viewable.  Our program uses RESTful requests and responses to and from celestrak/openweathermap.  
+# We also used a singleton list to start and stop threaded functions for playing an audio file as well as flashing an LED.
+# Code Credits: http://raspberrypi.stackexchange.com/questions/7088/playing-audio-files-with-python
+
 import argparse	# argument parsing
 import csv			# to convert zip code to lat/long
 import ephem 		# for the orbit calculations
