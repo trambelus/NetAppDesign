@@ -156,14 +156,14 @@ def get_tle_from_norad(sat_id):
 	tle.extend(html[div_loc+23:html.find('</div>',div_loc)-70].split('\r\n'))
 	return tle
 
-def is_clear(lat, lon, t_date):
+def is_clear(zip, lat, lon, t_date):
 	"""
 	Given a set of coordinates and a date/time, returns True if the weather will be clear at that time.
 	Uses a shelf cache to minimize API access.
 	Uses the OpenWeatherMap API: http://openweathermap.org/api
 	"""
 
-	weathershelf = shelve.open('weather')
+	weathershelf = shelve.open('weather-%d' % zip)
 
 	# if it's an empty shelf or it hasn't been updated in at least 3 hours or there's no weather data for this date:
 	if ('last-update' not in weathershelf) or \
@@ -181,13 +181,13 @@ def is_clear(lat, lon, t_date):
 			#print("Adding %s to weathershelf" % time.strftime('%Y/%m/%d', time.localtime(item['dt'])))
 			i_date = time.strftime('%Y/%m/%d', time.localtime(item['dt']))
 			#print(i_date)
-			weathershelf[i_date] = item['weather'][0]['main'] == 'Clear'
+			weathershelf[i_date] = item['weather'][0]['main']
 
 		weathershelf['last-update'] = time.mktime(time.localtime())
 		weathershelf.sync()
 
 	try:
-		isclear = weathershelf[t_date]
+		isclear = weathershelf[t_date] == 'Clear'
 	except KeyError:
 		return None
 
@@ -293,7 +293,10 @@ def main():
 			log("Error: Satellite with ID %s not found" % args.sat_id)
 			return
 
+	log("Found TLE:")
+	print('\n'.join(tle))
 	sat = ephem.readtle(*tle)
+	print()
 
 	# Calculate a range of times and iterate
 	times = [time.time() + 60*60*hour + 24*60*60*day for day in range(15) for hour in range(24)]
@@ -306,13 +309,14 @@ def main():
 		observer.date = pk_datetime
 		t_date = str(pk_datetime).split(' ')[0]
 		(dark, pos) = sun_position_right(observer, pk_datetime)
-		clear = is_clear(lat, lon, t_date)
+		clear = is_clear(args.zip, lat, lon, t_date)
 
 		if clear == None:
 			continue
 		sathigh = pk_alt > SAT_MIN_ALT
 		#print("%s: sun=%s, clear=%s" % (pk_datetime, sun, clear))
-		transits.append((dark, pos, clear, sathigh, "%s peak at %d°, start az %d°, end az %d°" % (pk_datetime, pk_alt*R2D, s_az*R2D, e_az*R2D)))
+		transits.append((dark, pos, clear, sathigh, "%s peak at %d°, start az %d°, end az %d°, duration %ds" % \
+			(pk_datetime, pk_alt*R2D, s_az*R2D, e_az*R2D, (e_t-s_t)*86400)))
 		#print("%s: sun:%s, clear:%s" % (t_datetime, sun, clear))
 	selected_transits = [t[-1] for t in transits if all(t[:-1])][:5]
 	log("Found %d transits in next 16 days" % (len(selected_transits)))
@@ -334,6 +338,12 @@ def main():
 			return ', '.join(reasons)
 
 		print('\n'.join(["%s \n\t(%s)" % (t[-1],reason(t)) for t in transits if not all(t[:-1])]))
+
+	print("Forecast:")
+	weathershelf = shelve.open('weather-%d' % args.zip)
+	for k in sorted(weathershelf.keys()):
+		if k != 'last-update':
+			print("%s: %s" % (k, weathershelf[k]))
 
 	if len(selected_transits) > 0:
 		wait_for_transit(' '.join(selected_transits[0].split(' ')[:2]), args.sat, selected_transits[0])
