@@ -40,6 +40,7 @@ if GPIO_AVAILABLE:
 	FLASH_DELAY = 1 # flash delay in seconds
 	# Setup GPIO as output
 	GPIO.setmode(GPIO.BOARD)
+	GPIO.setwarnings(False)
 	GPIO.setup(LED, GPIO.OUT)
 	GPIO.output(LED, GPIO.LOW)
 
