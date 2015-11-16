@@ -312,7 +312,8 @@ def main():
 		clear = is_clear(args.zip, lat, lon, t_date)
 
 		if clear == None:
-			continue
+			print("Could not get weather information for %s; cutting off here" % t_date)
+			break
 		sathigh = pk_alt > SAT_MIN_ALT
 		#print("%s: sun=%s, clear=%s" % (pk_datetime, sun, clear))
 		transits.append((dark, pos, clear, sathigh, "%s peak at %d°, start az %d°, end az %d°, duration %ds" % \
