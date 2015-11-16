@@ -15,7 +15,7 @@ from threading import Thread
 try:
 	import pygame
 except ImportError:
-	pass
+	print("Failed importing pygame")
 
 try:
 	import RPi.GPIO as GPIO
@@ -312,8 +312,8 @@ def main():
 		#print("%s: sun=%s, clear=%s" % (pk_datetime, sun, clear))
 		transits.append((dark, pos, clear, sathigh, "%s peak at %d°, start az %d°, end az %d°" % (pk_datetime, pk_alt*R2D, s_az*R2D, e_az*R2D)))
 		#print("%s: sun:%s, clear:%s" % (t_datetime, sun, clear))
-	print("\n")
 	selected_transits = [t[-1] for t in transits if all(t[:-1])][:5]
+	log("Found %d transits in next 16 days" % (len(selected_transits)))
 	print('\n'.join(selected_transits))
 
 	if args.verbose:
