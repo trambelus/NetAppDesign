@@ -325,7 +325,10 @@ def main():
 			break
 		sathigh = pk_alt > SAT_MIN_ALT
 		#print("%s: sun=%s, clear=%s" % (pk_datetime, sun, clear))
+		
+		# cdr: Translates an azimuth direction in radians into a cardinal direction
 		cdr = lambda x: ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][round(x/22.5*R2D)%16]
+
 		transits.append((dark, pos, clear, sathigh, "%s peak at %d°, start az %d° (%s), end az %d° (%s), duration %ds" % \
 			(pk_datetime, pk_alt*R2D, s_az*R2D, cdr(s_az), e_az*R2D, cdr(e_az), (e_t-s_t)*86400)))
 		#print("%s: sun:%s, clear:%s" % (t_datetime, sun, clear))
