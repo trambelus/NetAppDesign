@@ -64,7 +64,7 @@ else:
 
 #This funciton sends a text message using Twilio
 def sendTextMessage(sat, transit_info):
-	textMessage = "Satellite '%d' will be visible in 15 minutes!\nTransit at %s" % (sat, transit_info)
+	textMessage = "Satellite '%s' will be visible in 15 minutes!\nTransit at %s" % (str(sat), transit_info)
 	CLIENT.messages.create(to='+15407974693', from_='+15406135061', body=textMessage)
 	log('Sent Text Message!')
 
