@@ -1,20 +1,54 @@
 #!/usr/bin/env python
 
-script = """
-#!/bin/sh
-# /etc/init.d/pissh-pi.sh
-### BEGIN INIT INFO
-# Provides:          noip
-# Required-Start:    $remote_fs $syslog
-# Required-Stop:     $remote_fs $syslog
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: Simple script to start a program at boot
-# Description:       A simple script from www.stuffaboutcode.com which will start / stop a program a boot / shutdown.
-### END INIT INFO
+import argparse
+import os
 
-sleep 15
-wget "http://jenna.xen.prgmr.com:5000/pissh/push?ip=$(ifconfig wlan0 | awk '/inet addr/{print substr($2,6)}')&id={}" -O /dev/null &>/dev/null
-exit 0
-"""
+def main():
+	parser = argparse.ArgumentParser("Installer for PiSSH IP announcer into Raspberry Pi startup")
+	parser.add_argument("id", help='string to identify this device on the server')
+	args = parser.parse_args()
+	pi_id = parser.id
 
+	script = """
+	#!/bin/sh
+	# /etc/init.d/pissh-pi.sh
+	### BEGIN INIT INFO
+	# Provides:          PiSSH
+	# Required-Start:    $remote_fs $syslog $network
+	# Required-Stop:     $remote_fs $syslog $network
+	# Default-Start:     2 3 4 5
+	# Default-Stop:      0 1 6
+	# Short-Description: Announces this pi's ip to a server
+	# Description:       Sends this device's local wlan0 IP address to the PiSSH server, and clears it on shutdown.
+	### END INIT INFO
+
+	case "$1" in
+		start)
+			sleep 5
+			ip = $(ifconfig wlan0 | awk '/inet addr/{print substr($2,6)}')
+			echo "PiSSH: Sending IP $ip to server"
+			wget "http://jenna.xen.prgmr.com:5000/pissh/push?ip=$ip&id={0}" -O /dev/null &>/dev/null
+			;;
+		stop)
+			echo "PiSSH: Clearing entry from server"
+			wget "http://jenna.xen.prgmr.com:5000/pissh/clear?id={0}" -O /dev/null &>/dev/null
+			;;
+		*)
+			echo "Usage: /etc/init.d/pissh {start|stop}"
+			exit 1
+			;;
+	esac
+	exit 0
+	""".format(pi_id)
+
+	try:
+		os.system('sudo update-rc.d -f pissh remove') # Remove previous services called 'pissh', just in case
+		with open('/etc/init.d/pissh', 'w') as f:	# (over)write the file at this location
+			f.write(script)
+		os.system('sudo update-rc.d pissh defaults') # Install this service
+	except Exception as ex:
+		print("Something went wrong. Did you remember to sudo?")
+		raise ex
+
+if __name__ == '__main__':
+	main()

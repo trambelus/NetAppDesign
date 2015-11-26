@@ -22,9 +22,10 @@ def show_ip():
 		return ''
 
 @app.route('/pissh/clear')
-def clear_shelf():
-	shelf.clear()
-	return 'List cleared'
+def clear_ip():
+	requested_id = request.args['id']
+	del shelf[requested_id]
+	return "Cleared entry for '%s'" % requested_id
 
 def main():
 	app.run(host='0.0.0.0')

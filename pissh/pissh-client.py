@@ -4,6 +4,9 @@ import requests
 import time
 import argparse
 import os
+import configparser
+
+CONFIG_FILE = 'pissh.ini'
 
 def log(*msg):
 	"""
@@ -19,9 +22,23 @@ def log(*msg):
 
 def main():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-id', default='T25Pi', help='ID of Pi to search for')
+	parser.add_argument('-id', required=False, help='ID of Pi to search for')
 	args = parser.parse_args()
-	pi_id = args.id
+
+	config = configparser.ConfigParser()
+	if not 'id' in args:
+		config.read(CONFIG_FILE)
+		if config.sections():
+			pi_id = config['defaults']['id']
+		else:
+			parser.error("Config file %s not found: id argument required" % CONFIG_FILE)
+	else:
+		pi_id = args.id
+		config = configparser.ConfigParser()
+		config['defaults'] = { 'id': pi_id }
+		with open(CONFIG_FILE, 'w') as configfile:
+			config.write(configfile)
+
 	while True:
 		try:
 			resp = requests.get('http://jenna.xen.prgmr.com:5000/pissh/pull?id=%s' % pi_id)
