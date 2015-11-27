@@ -45,7 +45,10 @@ def main():
 			if resp.text != '':
 				log("Found IP: attempting connection to %s" % resp.text)
 				os.system('putty -ssh %s' % resp.text)
-				return
+				if not 'y' in input("SSH connection closed. Reconnect? (y/n)"):
+					print("Exiting")
+					return
+				print("Attempting reconnection")
 		except Exception as ex:
 			log(ex)
 		time.sleep(1)
