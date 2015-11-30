@@ -41,7 +41,7 @@ def main():
 
 	while True:
 		try:
-			resp = requests.get('http://jenna.xen.prgmr.com:5000/pissh/pull?id=%s' % pi_id)
+			resp = requests.get('http://jenna.xen.prgmr.com:5281/pissh/pull?id=%s' % pi_id)
 			if resp.text != '':
 				log("Found IP: attempting connection to %s" % resp.text)
 				os.system('putty -ssh %s' % resp.text)

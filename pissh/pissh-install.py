@@ -26,11 +26,11 @@ case "$1" in
 		sleep 5
 		ip = $(ifconfig wlan0 | awk '/inet addr/{{print substr($2,6)}}')
 		echo "PiSSH: Sending IP $ip to server"
-		wget "http://jenna.xen.prgmr.com:5000/pissh/push?ip=$ip&id={0}" -O /dev/null &>/dev/null
+		wget "http://jenna.xen.prgmr.com:5281/pissh/push?ip=$ip&id={0}" -O /dev/null &>/dev/null
 		;;
 	stop)
 		echo "PiSSH: Clearing entry from server"
-		wget "http://jenna.xen.prgmr.com:5000/pissh/clear?id={0}" -O /dev/null &>/dev/null
+		wget "http://jenna.xen.prgmr.com:5281/pissh/clear?id={0}" -O /dev/null &>/dev/null
 		;;
 	*)
 		echo "Usage: /etc/init.d/pissh {{start|stop}}"
