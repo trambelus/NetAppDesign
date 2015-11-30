@@ -28,7 +28,7 @@ def clear_ip():
 	return "Cleared entry for '%s'" % requested_id
 
 def main():
-	app.run(host='0.0.0.0', port=80)
+	app.run(host='0.0.0.0', port=5281)
 
 if __name__ == '__main__':
 	main()
