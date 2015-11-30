@@ -7,7 +7,7 @@ def main():
 	parser = argparse.ArgumentParser("Installer for PiSSH IP announcer into Raspberry Pi startup")
 	parser.add_argument("id", help='string to identify this device on the server')
 	args = parser.parse_args()
-	pi_id = parser.id
+	pi_id = args.id
 
 	script = """
 	#!/bin/sh

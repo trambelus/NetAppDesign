@@ -26,7 +26,7 @@ def main():
 	args = parser.parse_args()
 
 	config = configparser.ConfigParser()
-	if not 'id' in args:
+	if args.id == None:
 		config.read(CONFIG_FILE)
 		if config.sections():
 			pi_id = config['defaults']['id']
@@ -45,7 +45,7 @@ def main():
 			if resp.text != '':
 				log("Found IP: attempting connection to %s" % resp.text)
 				os.system('putty -ssh %s' % resp.text)
-				if not 'y' in input("SSH connection closed. Reconnect? (y/n)"):
+				if not 'y' in input("SSH connection closed. Reconnect? (y/n): "):
 					print("Exiting")
 					return
 				print("Attempting reconnection")
