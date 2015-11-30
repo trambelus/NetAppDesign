@@ -34,7 +34,7 @@ def main():
 			wget "http://jenna.xen.prgmr.com:5000/pissh/clear?id={0}" -O /dev/null &>/dev/null
 			;;
 		*)
-			echo "Usage: /etc/init.d/pissh {start|stop}"
+			echo "Usage: /etc/init.d/pissh {{start|stop}}"
 			exit 1
 			;;
 	esac
