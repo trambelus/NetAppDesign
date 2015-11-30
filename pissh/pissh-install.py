@@ -9,37 +9,36 @@ def main():
 	args = parser.parse_args()
 	pi_id = args.id
 
-	script = """
-	#!/bin/sh
-	# /etc/init.d/pissh-pi.sh
-	### BEGIN INIT INFO
-	# Provides:          PiSSH
-	# Required-Start:    $remote_fs $syslog $network
-	# Required-Stop:     $remote_fs $syslog $network
-	# Default-Start:     2 3 4 5
-	# Default-Stop:      0 1 6
-	# Short-Description: Announces this pi's ip to a server
-	# Description:       Sends this device's local wlan0 IP address to the PiSSH server, and clears it on shutdown.
-	### END INIT INFO
+	script = """#!/bin/sh
+# /etc/init.d/pissh
+### BEGIN INIT INFO
+# Provides:          PiSSH
+# Required-Start:    $remote_fs $syslog $network
+# Required-Stop:     $remote_fs $syslog $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Announces this pi's ip to a server
+# Description:       Sends this device's local wlan0 IP address to the PiSSH server, and clears it on shutdown.
+### END INIT INFO
 
-	case "$1" in
-		start)
-			sleep 5
-			ip = $(ifconfig wlan0 | awk '/inet addr/{{print substr($2,6)}}')
-			echo "PiSSH: Sending IP $ip to server"
-			wget "http://jenna.xen.prgmr.com:5000/pissh/push?ip=$ip&id={0}" -O /dev/null &>/dev/null
-			;;
-		stop)
-			echo "PiSSH: Clearing entry from server"
-			wget "http://jenna.xen.prgmr.com:5000/pissh/clear?id={0}" -O /dev/null &>/dev/null
-			;;
-		*)
-			echo "Usage: /etc/init.d/pissh {{start|stop}}"
-			exit 1
-			;;
-	esac
-	exit 0
-	""".format(pi_id)
+case "$1" in
+	start)
+		sleep 5
+		ip = $(ifconfig wlan0 | awk '/inet addr/{{print substr($2,6)}}')
+		echo "PiSSH: Sending IP $ip to server"
+		wget "http://jenna.xen.prgmr.com:5000/pissh/push?ip=$ip&id={0}" -O /dev/null &>/dev/null
+		;;
+	stop)
+		echo "PiSSH: Clearing entry from server"
+		wget "http://jenna.xen.prgmr.com:5000/pissh/clear?id={0}" -O /dev/null &>/dev/null
+		;;
+	*)
+		echo "Usage: /etc/init.d/pissh {{start|stop}}"
+		exit 1
+		;;
+esac
+exit 0
+""".format(pi_id)
 
 	try:
 		os.system('sudo update-rc.d -f pissh remove') # Remove previous services called 'pissh', just in case
