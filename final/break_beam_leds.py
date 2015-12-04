@@ -11,8 +11,8 @@ from threading import Thread
 import RPi.GPIO as GPIO
 import sys
 
-# GPIO pin number of LED according to spec; GPIO pin 18 Phys Pin 12
-LED = 12
+# GPIO pin number of LED according to spec; GPIO pin 17 Phys Pin 11
+LED = 11
 
 # TCP_IP = '192.168.0.12'
 # TCP_IP = '0.0.0.0'
@@ -21,14 +21,14 @@ BUFFER_SIZE = 1
 
 # Setup GPIO as output
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(LED, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+GPIO.setup(LED, GPIO.IN)
 
 def main():
 	print("Starting infinite while loop")
 	try:
 		while True:
 			break_beam = GPIO.input(LED)
-			if break_beam is True:
+			if break_beam == 1:
 				print('LED beam is connected')
 				time.sleep(1)
 			else:
