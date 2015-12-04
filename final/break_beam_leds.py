@@ -30,8 +30,10 @@ def main():
 			break_beam = GPIO.input(LED)
 			if break_beam is True:
 				print('LED beam is connected')
+				time.sleep(1)
 			else:
 				print('LED beam is broken')
+				time.sleep(1)
 	except KeyboardInterrupt:
 			GPIO.cleanup()
 			conn.close() # Close socket connection
