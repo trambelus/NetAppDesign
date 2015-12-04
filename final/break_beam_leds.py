@@ -25,12 +25,13 @@ GPIO.setup(LED, GPIO.IN)
 
 def main():
 	print("Starting infinite while loop")
-	while True:
-		break_beam = GPIO.input(LED)
-		if break_beam is True:
-			print('LED beam is connected')
-		else:
-			print('LED beam is broken')
+	try:
+		while True:
+			break_beam = GPIO.input(LED)
+			if break_beam is True:
+				print('LED beam is connected')
+			else:
+				print('LED beam is broken')
 	except KeyboardInterrupt:
 			GPIO.cleanup()
 			conn.close() # Close socket connection
