@@ -21,7 +21,7 @@ BUFFER_SIZE = 1
 
 # Setup GPIO as output
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(LED, GPIO.IN)
+GPIO.setup(LED, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 
 def main():
 	print("Starting infinite while loop")
