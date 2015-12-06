@@ -24,15 +24,28 @@ GPIO.setmode(GPIO.BOARD)
 GPIO.setup(LED, GPIO.IN)
 
 def main():
+	if len(sys.argv) == 1:
+		TCP_IP = '172.30.144.131'
+	else:
+		TCP_IP = sys.argv[1]
 	print("Starting infinite while loop")
 	try:
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		s.bind((TCP_IP, TCP_PORT))
+		s.listen(1)
 		while True:
+			# not sure where to place this yet
+			# conn, addr = s.accept()
 			break_beam = GPIO.input(LED)
 			if break_beam == 1:
 				print('LED beam is connected')
+				send_data = 1
+				conn.send(chr(send_data))  # Send ACK to Camera Pi
 				time.sleep(1)
 			else:
 				print('LED beam is broken')
+				send_data = 0
+				conn.send(chr(send_data))  # Send ACK to Camera Pi
 				time.sleep(1)
 	except KeyboardInterrupt:
 			GPIO.cleanup()
