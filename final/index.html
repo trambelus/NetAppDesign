@@ -1,0 +1,76 @@
+<html>	
+
+<head>
+
+<script type="text/javascript">
+
+var building="";
+
+function setText(text) {
+	document.getElementById('choice').innerHTML= 'You have selected '+text+' as the building to query. Please enter the password for the room below';
+	building=text
+	return false;
+}
+</script>
+
+</head>
+
+<body>
+
+<script type="text/javascript">
+function loadInfo() {
+    if (document.getElementById('password').value == 'hello') {
+		window.location.href = "file:///C:/Users/Cody%20Cummings/Documents/Senior/results.html?building="+building;
+	}	
+	else 
+	{
+		alert('Sorry, there is no room in the selected building that uses that password');
+	}
+}
+</script>
+
+<center>
+<style type="text/css">
+	body{background-color: orange;}
+</style>
+
+<div class="title">
+<h1><font color="maroon">Welcome to the Room Density Monitor Web Server!</font></h1>
+
+<p>Click on the building which contains the room you would like to know the availability of!</p>
+
+</div>
+
+<div>
+
+<img src="https://www.parking.vt.edu/docs/images/garage/garagemap_large.jpg" id="image" alt="VT Campus" height="500" width="700" usemap="#campusmap">
+<map name="campusmap">
+	<area shape="circle" coords="260, 40, 40" alt="SEB" href="#" onClick="setText('SEB')">
+	<area shape="circle" coords="340, 125, 30" alt="Whittemore Hall" href="#" onClick="setText('Whittemore Hall')">
+	<area shape="circle" coords="405, 85, 30" alt="Randolph Hall" href="#" onClick="setText('Randolph Hall')">
+	<area shape="circle" coords="485, 110, 35" alt="Lavery Hall" href="#" onClick="setText('Lavery Hall')">
+	<area shape="circle" coords="260, 260, 35" alt="Derring Hall" href="#" onClick="setText('Derring Hall')">
+	<area shape="circle" coords="210, 310, 25" alt="Hanh Hall" href="#" onClick="setText('Hanh Hall')">
+	<area shape="circle" coords="255, 345, 25" alt="Hanh Hall" href="#" onClick="setText('no')">
+	<area shape="circle" coords="295, 325, 25" alt="Hanh Hall" href="#" onClick="setText('no')">
+	<area shape="circle" coords="325, 290, 25" alt="Hanh Hall" href="#" onClick="setText('no')">
+	<area shape="circle" coords="400, 270, 35" alt="Burruss Hall" href="#" onClick="setText('Burruss Hall')">
+
+</map>
+<p id="choice"></p>
+
+
+
+<form class="form1" method="POST" onsubmit="return false">
+	Password: 
+	<input type="password" id="password" />
+	<button onclick="loadInfo()">Submit</button>
+
+</form>
+
+</div>
+
+
+</center>
+</body>
+</html>
