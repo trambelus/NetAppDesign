@@ -7,7 +7,6 @@
 # It then relays the detection to the camera pi to take a snap shot.
 import socket
 import time
-from threading import Thread
 import RPi.GPIO as GPIO
 import sys
 
@@ -18,38 +17,40 @@ LED = 11
 # TCP_IP = '0.0.0.0'
 TCP_PORT = 45678
 BUFFER_SIZE = 1
+pi_id = 'camera_pi'
+led_on = 1
+led_off = 0
 
 # Setup GPIO as output
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(LED, GPIO.IN)
 
 def main():
-	if len(sys.argv) == 1:
-		TCP_IP = '172.30.144.131'
-	else:
-		TCP_IP = sys.argv[1]
 	print("Starting infinite while loop")
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		s.bind((TCP_IP, TCP_PORT))
-		s.listen(1)
-		while True:
-			# not sure where to place this yet
-			# conn, addr = s.accept()
-			break_beam = GPIO.input(LED)
-			if break_beam == 1:
-				print('LED beam is connected')
-				send_data = 1
-				conn.send(chr(send_data))  # Send ACK to Camera Pi
-				time.sleep(1)
-			else:
-				print('LED beam is broken')
-				send_data = 0
-				conn.send(chr(send_data))  # Send ACK to Camera Pi
-				time.sleep(1)
+		resp = requests.get('http://jenna.xen.prgmr.com:5281/pissh/pull?id=%s' % pi_id)
+		if resp == '':
+			return
+		else:
+			s.connect(resp, TCP_PORT)
+			while True:
+				# not sure where to place this yet
+				# conn, addr = s.accept()
+				break_beam = GPIO.input(LED)
+				if break_beam == 1:
+					print('LED beam is connected')
+					send_data = 1
+					time.sleep(1)
+					s.send(bytes(chr(led_on), 'UTF-8'))  # Send ACK to Camera Pi
+				else:
+					print('LED beam is broken')
+					send_data = 0
+					time.sleep(60)
+					s.send(bytes(chr(led_off), 'UTF-8'))  # Send ACK to Camera Pi
 	except KeyboardInterrupt:
 			GPIO.cleanup()
-			conn.close() # Close socket connection
+			s.close() # Close socket connection
 
 if __name__ == '__main__':
 	main()
