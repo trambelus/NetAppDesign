@@ -44,6 +44,7 @@ exit 0
 		os.system('sudo update-rc.d -f pissh remove') # Remove previous services called 'pissh', just in case
 		with open('/etc/init.d/pissh', 'w') as f:	# (over)write the file at this location
 			f.write(script)
+		os.system('sudo chmod +x /etc/init.d/pissh')
 		os.system('sudo update-rc.d pissh defaults') # Install this service
 	except Exception as ex:
 		print("Something went wrong. Did you remember to sudo?")
