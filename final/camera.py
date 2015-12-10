@@ -8,7 +8,7 @@ import socket
 import requests
 
 TCP_IP = requests.get('http://jenna.xen.prgmr.com:5281/pissh/pull?id=camera_pi')
-TCP_PORT = 45675
+TCP_PORT = 45674
 camera = picamera.PiCamera()
 
 def main():
