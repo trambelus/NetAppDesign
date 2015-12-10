@@ -25,7 +25,9 @@ def rooms():
 
 		flash('Authentication successful')
 		return render_template('results.html', room=request.form['room'])
-	return render_template('index.html')
+
+	elif request.method == 'GET':
+		return render_template('index.html')
 
 def main():
 	app.run(host='0.0.0.0', port=80, debug=True)
