@@ -8,7 +8,7 @@ import socket
 import requests
 
 TCP_IP = requests.get('http://jenna.xen.prgmr.com:5281/pissh/pull?id=camera_pi')
-TCP_PORT = 45678
+TCP_PORT = 45679
 camera = picamera.PiCamera()
 #testing
 #put all in a while loop, always wait for a signal to take another photo and process again
@@ -18,9 +18,9 @@ s.listen(1)
 while (1):
 	(conn, addr) = s.accept()
 	recv_data = ord(conn.recv(1))
+	print recv_data
 	if (recv_data == 0):
 		print "Received Signal"
-
 		camera.capture('dump.jpg')
 		time.sleep(3)
 		camera.capture('orig.jpg') #"empty room"
