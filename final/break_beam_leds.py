@@ -31,10 +31,11 @@ def main():
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		resp = requests.get('http://jenna.xen.prgmr.com:5281/pissh/pull?id=%s' % pi_id)
-		if resp == '':
+		ip = resp.text
+		if ip == '':
 			return
 		else:
-			s.connect((resp, TCP_PORT))
+			s.connect((ip, TCP_PORT))
 			while True:
 				# not sure where to place this yet
 				# conn, addr = s.accept()
