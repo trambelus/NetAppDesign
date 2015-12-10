@@ -1,22 +1,26 @@
-from PIL import Image, ImageFilter
+#!/usr/bin/env python3
+from PIL import Image, ImageFilter, ImageChops
+from imgurpython import ImgurClient
 import picamera
-from PIL import ImageChops
 import math, operator
 import time
 import socket
 import requests
-TCP_IP = requests.get('http://jenna.xen.prgrmr.com:5281/pissh/pull?id=camera_pi')
-TCP_PORT = 45678
+
+TCP_IP = requests.get('http://jenna.xen.prgmr.com:5281/pissh/pull?id=camera_pi')
+TCP_PORT = 45679
 camera = picamera.PiCamera()
 #testing
 #put all in a while loop, always wait for a signal to take another photo and process again
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind((TCP_IP, TCP_PORT))
+s.bind((TCP_IP.text, TCP_PORT))
 s.listen(1)
 while (1):
 	(conn, addr) = s.accept()
 	recv_data = ord(conn.recv(1))
+	print recv_data
 	if (recv_data == 0):
+		print "Received Signal"
 		camera.capture('dump.jpg')
 		time.sleep(3)
 		camera.capture('orig.jpg') #"empty room"
@@ -25,7 +29,13 @@ while (1):
 
 		img1 = Image.open('orig.jpg')
 		img2 = Image.open('update.jpg')
+
+		print "Captured Images"
+
 		toSend = img2.resize((400, 400), Image.ANTIALIAS)
+		toSend.save('latest.png')
+		files = {'file': ('latest.png', open('latest.png','rb'), {'Expires': '0', 'Auth':'8spWsLd38ji08Tpc'})}
+		rsp = requests.post('http://trambel.us/rooms/upload', files=files)
 
 		img1 = img1.filter(ImageFilter.FIND_EDGES)
 		img1.save('orig.jpg')
@@ -47,3 +57,5 @@ while (1):
 			print "kind of full"
 		else:
 			print "full"
+		conn.close()
+

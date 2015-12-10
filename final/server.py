@@ -1,23 +1,44 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request
+from flask import Flask, request, flash, redirect, url_for
 from pprint import pprint
+import hashlib
 
 app = Flask(__name__)
 
-fob_html = """<meta name="viewport" content="width=device-width, initial-scale=1">
-<div style='position:fixed; height:100%; width:100%; top:0; left:0;'>
-	<img src=http://i.imgur.com/lm1WSXT.png style='max-width:100%;max-height:100%'>
-</div
-"""
+@app.route('/rooms')
+def rooms():
+	with open('index.html') as f:
+		index_html = '\n'.join(f.readlines())
+	return index_html
 
-@app.route('/') # Just as a quick test
-def fallout_boy():
-	return fob_html
+@app.route('/rooms/upload', methods=['GET','POST'])
+def upload():
+	if request.method == 'POST':
+		f = request.files['latest.png']
+		f.save('/img/latest.png')
+
+@app.route('/rooms/validate', methods=['GET','POST'])
+def validate():
+	if request.method == 'POST':
+		with open('hash.txt','r') as f:
+			hash_s = f.readlines()[0]
+		hash_f = hashlib.new('sha256')
+		hash_f.update(bytes(request.form1['password'],'UTF-8'))
+		if hash_f.hex_digest() != hash_s:
+			abort(401)
+		flash('Authentication successful')
+		return redirect(url_for('/rooms/display'))
+
+@app.route('/rooms/display', methods=['GET'])
+def display():
+	with open('results.html') as f:
+		results_html = '\n'.join(f.readlines())
+	return results_html
 
 def main():
-	app.add_url_rule('/favicon.ico', redirect_to=url_for('static', filename='favicon.ico'))
 	app.run(host='0.0.0.0', port=80)
+	app.add_url_rule('/favicon.ico', redirect_to=url_for('static', filename='favicon.ico'))
 
 if __name__ == '__main__':
 	main()
