@@ -16,7 +16,7 @@ def init_db():
 def upload():
 	if request.method == 'POST':
 		f = request.files['file']
-		f.save('img/latest.png')
+		f.save('latest.png')
 		return ''
 
 @app.route('/rooms', methods=['GET','POST'])
