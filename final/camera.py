@@ -19,6 +19,8 @@ while (1):
 	(conn, addr) = s.accept()
 	recv_data = ord(conn.recv(1))
 	if (recv_data == 0):
+		print "Received Signal"
+
 		camera.capture('dump.jpg')
 		time.sleep(3)
 		camera.capture('orig.jpg') #"empty room"
@@ -27,6 +29,9 @@ while (1):
 
 		img1 = Image.open('orig.jpg')
 		img2 = Image.open('update.jpg')
+
+		print "Captured Images"
+
 		toSend = img2.resize((400, 400), Image.ANTIALIAS)
 		toSend.save('latest.png')
 		files = {'file': ('latest.png', open('latest.png','rb'), {'Expires': '0', 'Auth':'8spWsLd38ji08Tpc'})}
