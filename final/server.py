@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request, flash, redirect,  render_templat
+from flask import Flask, request, flash, redirect,  render_template
 from pprint import pprint
 import hashlib
 
