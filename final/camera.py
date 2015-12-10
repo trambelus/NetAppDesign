@@ -27,10 +27,9 @@ def main():
 			s.listen(1)
 			#testing
 			#put all in a while loop, always wait for a signal to take another photo and process again
+			conn, addr) = s.accept()
 			while (1):
 				print('Infinite while')
-				(conn, addr) = s.accept()
-				print('After accepted')
 				recv_data = ord(conn.recv(1))
 				print recv_data
 				if (recv_data == 0):
@@ -64,15 +63,13 @@ def main():
 
 					print black[0] #number of black pixels
 					print white[0] #number of white pixels
-					conn.close()
-
 					if (white[0] < 3500):
 						print "relatively empty"
 					elif (white[0] <5000):
 						print "kind of full"
 					else:
 						print "full"
-				#conn.close()
+				conn.close()
 	except KeyboardInterrupt:
 		s.close() # Close socket connection
 
