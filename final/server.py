@@ -24,13 +24,10 @@ def rooms():
 			return render_template('index.html',error='Invalid password')
 
 		flash('Authentication successful')
-		return redirect('/rooms/display')
+		return render_template('results.html', room=request.form['room'])
+
 
 	return render_template('index.html')
-
-@app.route('/rooms/display', methods=['GET'])
-def display():
-	return render_template('results.html')
 
 def main():
 	app.run(host='0.0.0.0', port=80, debug=True)
