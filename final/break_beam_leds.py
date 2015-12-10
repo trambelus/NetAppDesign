@@ -35,6 +35,7 @@ def main():
 		if ip == '':
 			return
 		else:
+			print(ip)
 			s.connect((ip, TCP_PORT))
 			while True:
 				# not sure where to place this yet
