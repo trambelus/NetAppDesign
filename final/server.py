@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request, flash, redirect, url_for, render_template
+from flask import Flask, request, flash, redirect,  render_templat
 from pprint import pprint
 import hashlib
 
@@ -28,7 +28,7 @@ def validate():
 			return render_template('index.html',error='Invalid password')
 
 		flash('Authentication successful')
-		return redirect(url_for('/rooms/display'))
+		return redirect('/rooms/display')
 	return render_template('index.html',error='Invalid password')
 
 @app.route('/rooms/display', methods=['GET'])
