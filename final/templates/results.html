@@ -1,26 +1,25 @@
 <html>
 
 <head>
-<script type="text/javascript">
-function retreiveData() {
-	var building = window.location.href.split('=')[1];
-	if (building != 'SEB') {
-		var image = document.getElementById('roomImage')
+
+{ % if text % }
+<script>
+if (text == 'SEB') {
+	document.getElementById('place').innerHTML = 'Room 115 in the SEB';
+	document.getElementById('information').innerHTML = 'Currently, classroom 115 in the SEB is XX% full';
+
+}
+else {
+	var image = document.getElementById('roomImage')
 		image.parentNode.removeChild(image);
 		document.getElementById('place').innerHTML = 'Sorry, there is currently no data for the selected room';
 		var info = document.getElementById('information')
 		info.parentNode.removeChild(info);
 	}
-	//Correct room in SEB. Retreive data from server and display
-	else {
-	
-		document.getElementById('place').innerHTML = 'Room 115 in the SEB';
-		document.getElementById('information').innerHTML = 'Currently, classroom 115 in the SEB is XX% full';
-	}
 }
 
-window.onload = retreiveData;
 </script>
+{ % endif % }
 </head>
 
 <body>
@@ -34,11 +33,11 @@ window.onload = retreiveData;
 
 <p id="place">Room XXX in XXX hall</p>
 
-<img src="current.png" id="roomImage" alt="Image of Classroom" width="400" height="400"/>
+<img src="image.gif" id="roomImage" alt="Image of Classroom" width="400" height="400"/>
 
 <p id="information">Currently, classroom XXX in building XXX is XX% full</p>
 
-<form action="/rooms">
+<form action="file:///C:/Users/Cody%20Cummings/Documents/Senior/index.html">
     <input type="submit" value="Go Back">
 </form>
 </div>
