@@ -16,7 +16,7 @@ LED = 11
 
 # TCP_IP = '192.168.0.12'
 # TCP_IP = '0.0.0.0'
-TCP_PORT = 45679
+TCP_PORT = 45675
 BUFFER_SIZE = 1
 pi_id = 'camera_pi'
 led_on = 1
