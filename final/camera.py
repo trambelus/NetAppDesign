@@ -57,4 +57,5 @@ while (1):
 			print "kind of full"
 		else:
 			print "full"
+		conn.close()
 
