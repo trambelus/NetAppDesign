@@ -3,10 +3,8 @@
 <head>
 
 <script type="text/javascript">
-var building="";
 function setText(text) {
-	document.getElementById('choice').innerHTML= 'You have selected '+text+' as the building to query. Please enter the password for the room below';
-	building=text
+	document.getElementById('room').innerHTML= text;
 	return false;
 }
 </script>
@@ -50,6 +48,7 @@ function setText(text) {
 <form class="form1" method="POST" action="/rooms">
 	Password: 
 	<input type="password" name="password" id="password" />
+	<input type="hidden" name="room" id="room" />
 	<button type="submit">Submit</button>
 
 </form>
