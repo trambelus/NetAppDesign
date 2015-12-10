@@ -26,7 +26,8 @@ def validate():
 		with open('hash.txt','r') as f:
 			hash_s = f.readlines()[0]
 		print('Stored hash: %s' % hash_s)
-
+		print('Given password: %s' % request.form['password'])
+		print('Type: %s' % str(type(request.form['password'])))
 		hash_f = hashlib.new('sha256')
 		hash_f.update(bytes(request.form['password'],'UTF-8'))
 		print('given hash: %s' % hash_f.hex_digest())
