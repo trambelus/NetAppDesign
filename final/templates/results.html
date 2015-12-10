@@ -19,7 +19,7 @@
     <input type="submit" value="Go Back">
 </form>
 
-{ % if room % }
+{% if room %}
     <script>
 	if (text == 'SEB') {
 	    document.getElementById('place').innerHTML = 'Room 115 in the SEB';
@@ -34,7 +34,7 @@
 	    info.parentNode.removeChild(info);
 	}
     </script>
-{ % endif % }
+{% endif %}
 
 </div>
 </center>
