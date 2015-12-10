@@ -1,5 +1,5 @@
 from PIL import Image, ImageFilter, ImageChops
-from imgrpython import ImgurClient
+from imgurpython import ImgurClient
 import picamera
 import math, operator
 import time
