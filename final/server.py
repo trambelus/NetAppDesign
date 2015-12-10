@@ -7,18 +7,14 @@ import hashlib
 app = Flask(__name__)
 app.secret_key = 'vOaZrSbR8ZIpCAeU'
 
-@app.route('/rooms')
-def rooms():
-	return render_template('index.html')
-
 @app.route('/rooms/upload', methods=['GET','POST'])
 def upload():
 	if request.method == 'POST':
 		f = request.files['latest.png']
 		f.save('/img/latest.png')
 
-@app.route('/rooms/validate', methods=['GET','POST'])
-def validate():
+@app.route('/rooms', methods=['GET','POST'])
+def rooms():
 	if request.method == 'POST':
 		with open('hash.txt','r') as f:
 			hash_s = f.readlines()[0]
@@ -29,7 +25,8 @@ def validate():
 
 		flash('Authentication successful')
 		return redirect('/rooms/display')
-	return render_template('index.html',error='Invalid password')
+
+	return render_template('index.html')
 
 @app.route('/rooms/display', methods=['GET'])
 def display():
