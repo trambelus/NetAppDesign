@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 from PIL import Image, ImageFilter, ImageChops
 from imgurpython import ImgurClient
 import picamera
@@ -21,16 +21,14 @@ def main():
 			return
 		else:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			print('Binding socket')
 			s.bind((ip, TCP_PORT))
-			print('Listening')
 			s.listen(1)
 			#testing
 			#put all in a while loop, always wait for a signal to take another photo and process again
 			while (1):
 				print('Infinite while')
 				(conn, addr) = s.accept()
-				recv_data = int.from_bytes(conn.recv(1),byteorder='big')
+				recv_data = conn.recv(1)
 				print (recv_data)
 				if (recv_data == 0):
 					print ("Received Signal")
