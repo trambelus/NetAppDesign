@@ -1,8 +1,27 @@
 <html>
 
-<head>
+<body>
+<center>
+<style type="text/css">
+	body{background-color: orange;}
+</style>
 
-{ % if text % }
+<div class="title">
+<h1><font color="maroon">Results for your selected room are posted below!</font></h1>
+
+<p id="place">Room XXX in XXX hall</p>
+
+<img src="lastest.png" id="roomImage" alt="Image of Classroom" width="400" height="400"/>
+
+<p id="information">Currently, classroom XXX in building XXX is XX% full</p>
+
+<form action="file:///C:/Users/Cody%20Cummings/Documents/Senior/index.html">
+    <input type="submit" value="Go Back">
+</form>
+</div>
+</center>
+
+{ % if room % }
 <script>
 if (text == 'SEB') {
 	document.getElementById('place').innerHTML = 'Room 115 in the SEB';
@@ -20,27 +39,6 @@ else {
 
 </script>
 { % endif % }
-</head>
 
-<body>
-<center>
-<style type="text/css">
-	body{background-color: orange;}
-</style>
-
-<div class="title">
-<h1><font color="maroon">Results for your selected room are posted below!</font></h1>
-
-<p id="place">Room XXX in XXX hall</p>
-
-<img src="image.gif" id="roomImage" alt="Image of Classroom" width="400" height="400"/>
-
-<p id="information">Currently, classroom XXX in building XXX is XX% full</p>
-
-<form action="file:///C:/Users/Cody%20Cummings/Documents/Senior/index.html">
-    <input type="submit" value="Go Back">
-</form>
-</div>
-</center>
 </body>
 </html>
