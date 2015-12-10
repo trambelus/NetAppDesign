@@ -72,7 +72,6 @@ def main():
 						print "full"
 					conn.close()
 	except KeyboardInterrupt:
-	GPIO.cleanup()
 	s.close() # Close socket connection
 
 if __name__ == '__main__':
