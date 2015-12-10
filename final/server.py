@@ -10,7 +10,7 @@ app.secret_key = 'vOaZrSbR8ZIpCAeU'
 @app.route('/rooms/upload', methods=['GET','POST'])
 def upload():
 	if request.method == 'POST':
-		f = request.files['latest.png']
+		f = request.files['file']
 		f.save('/img/latest.png')
 
 @app.route('/rooms', methods=['GET','POST'])
@@ -26,8 +26,7 @@ def rooms():
 		flash('Authentication successful')
 		return render_template('results.html', room=request.form['room'])
 
-	elif request.method == 'GET':
-		return render_template('index.html')
+	return render_template('index.html')
 
 def main():
 	app.run(host='0.0.0.0', port=80, debug=True)
