@@ -53,7 +53,7 @@ def main():
 					s.send(bytes(chr(led_off), 'UTF-8'))  # Send ACK to Camera Pi
 	except KeyboardInterrupt:
 			GPIO.cleanup()
-			s.close() # Close socket connection
+			#s.close() # Close socket connection
 
 if __name__ == '__main__':
 	main()
