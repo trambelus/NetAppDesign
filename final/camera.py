@@ -70,13 +70,7 @@ def main():
 						print ("full")
 					conn.send(chr(0))
 					print("sent data back")
-<<<<<<< HEAD
 				#conn.close()
-=======
-					conn.close()
-				else:
-					conn.close()
->>>>>>> origin/master
 	except KeyboardInterrupt:
 		s.close() # Close socket connection
 
