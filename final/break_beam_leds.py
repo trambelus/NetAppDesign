@@ -34,7 +34,7 @@ def main():
 		if resp == '':
 			return
 		else:
-			s.connect(resp, TCP_PORT)
+			s.connect((resp, TCP_PORT))
 			while True:
 				# not sure where to place this yet
 				# conn, addr = s.accept()
