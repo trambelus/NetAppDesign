@@ -25,6 +25,8 @@ while (1):
 
 		img1 = Image.open('orig.jpg')
 		img2 = Image.open('update.jpg')
+		toSend = img2.resize((400, 400), Image.ANTIALIAS)
+
 		img1 = img1.filter(ImageFilter.FIND_EDGES)
 		img1.save('orig.jpg')
 		img2 = img2.filter(ImageFilter.FIND_EDGES)
