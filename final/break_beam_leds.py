@@ -51,6 +51,8 @@ def main():
 					print(led_off)
 					time.sleep(10) # was 60
 					s.send(bytes(chr(led_off), 'UTF-8'))  # Send ACK to Camera Pi
+					resp = int.from_bytes(s.recv(1), byteorder='little')
+					print("Remote Pi responded with code %d" %  resp)
 	except KeyboardInterrupt:
 			GPIO.cleanup()
 			s.close() # Close socket connection
