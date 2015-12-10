@@ -30,7 +30,7 @@ def rooms():
 
 @app.route('/rooms/display', methods=['GET'])
 def display():
-	return render_template('results.html')
+	return render_template('results.html',text='SEB')
 
 def main():
 	app.run(host='0.0.0.0', port=80, debug=True)
