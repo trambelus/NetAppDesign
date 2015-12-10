@@ -27,8 +27,6 @@ def rooms():
 		return render_template('results.html', room=request.form['room'])
 
 
-	return render_template('index.html')
-
 def main():
 	app.run(host='0.0.0.0', port=80, debug=True)
 
