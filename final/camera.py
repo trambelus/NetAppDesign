@@ -72,7 +72,7 @@ def main():
 						print "full"
 					conn.close()
 	except KeyboardInterrupt:
-	s.close() # Close socket connection
+		s.close() # Close socket connection
 
 if __name__ == '__main__':
 	main()
