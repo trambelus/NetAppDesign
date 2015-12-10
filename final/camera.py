@@ -67,7 +67,7 @@ def main():
 						print ("kind of full")
 					else:
 						print ("full")
-				conn.close()
+				 conn.close()
 	except KeyboardInterrupt:
 		s.close() # Close socket connection
 
