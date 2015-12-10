@@ -27,6 +27,7 @@ def main():
 			#testing
 			#put all in a while loop, always wait for a signal to take another photo and process again
 			while (1):
+				recv_data = 5
 				print('Infinite while')
 				recv_data = ord(conn.recv(1))
 				print (recv_data)
@@ -69,7 +70,13 @@ def main():
 						print ("full")
 					conn.send(chr(0))
 					print("sent data back")
+<<<<<<< HEAD
 				#conn.close()
+=======
+					conn.close()
+				else:
+					conn.close()
+>>>>>>> origin/master
 	except KeyboardInterrupt:
 		s.close() # Close socket connection
 
