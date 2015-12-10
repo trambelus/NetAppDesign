@@ -47,6 +47,7 @@ def main():
 					time.sleep(1)
 					print(led_on)
 					#s.send(bytes(chr(led_on), 'UTF-8'))  # Send ACK to Camera Pi
+					s.close()
 				else:
 					print('LED beam is broken')
 					print(led_off)
