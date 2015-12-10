@@ -9,14 +9,10 @@ app.secret_key = 'vOaZrSbR8ZIpCAeU'
 
 @app.route('/rooms')
 def rooms():
-	pprint(request)
-	with open('index.html') as f:
-		index_html = '\n'.join(f.readlines())
-	return render_template(index_html)
+	return render_template('index.html')
 
 @app.route('/rooms/upload', methods=['GET','POST'])
 def upload():
-	pprint(request)
 	if request.method == 'POST':
 		f = request.files['latest.png']
 		f.save('/img/latest.png')
@@ -37,10 +33,7 @@ def validate():
 
 @app.route('/rooms/display', methods=['GET'])
 def display():
-	pprint(request)
-	with open('results.html') as f:
-		results_html = '\n'.join(f.readlines())
-	return render_template(results_html)
+	return render_template('results.html')
 
 def main():
 	app.run(host='0.0.0.0', port=80, debug=True)
