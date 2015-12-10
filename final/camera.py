@@ -13,7 +13,7 @@ camera = picamera.PiCamera()
 #testing
 #put all in a while loop, always wait for a signal to take another photo and process again
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind((TCP_IP, TCP_PORT))
+s.bind((TCP_IP.text, TCP_PORT))
 s.listen(1)
 while (1):
 	(conn, addr) = s.accept()
