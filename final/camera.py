@@ -30,6 +30,7 @@ def main():
 			while (1):
 				print('Infinite while')
 				(conn, addr) = s.accept()
+				print('After accepted')
 				recv_data = ord(conn.recv(1))
 				print recv_data
 				if (recv_data == 0):
