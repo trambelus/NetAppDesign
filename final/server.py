@@ -5,13 +5,14 @@ from pprint import pprint
 import hashlib
 
 app = Flask(__name__)
+app.secret_key = 'vOaZrSbR8ZIpCAeU'
 
 @app.route('/rooms')
 def rooms():
 	pprint(request)
 	with open('index.html') as f:
 		index_html = '\n'.join(f.readlines())
-	return index_html
+	return render_template(index_html)
 
 @app.route('/rooms/upload', methods=['GET','POST'])
 def upload():
@@ -39,7 +40,7 @@ def display():
 	pprint(request)
 	with open('results.html') as f:
 		results_html = '\n'.join(f.readlines())
-	return results_html
+	return render_template(results_html)
 
 def main():
 	app.run(host='0.0.0.0', port=80, debug=True)
