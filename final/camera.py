@@ -30,10 +30,10 @@ def main():
 			while (1):
 				print('Infinite while')
 				(conn, addr) = s.accept()
-				recv_data = conn.recv(1024)
-				print recv_data
+				recv_data = int.from_bytes(conn.recv(1),byteorder='big')
+				print (recv_data)
 				if (recv_data == 0):
-					print "Received Signal"
+					print ("Received Signal")
 					camera.capture('dump.jpg')
 					time.sleep(3)
 					camera.capture('orig.jpg') #"empty room"
@@ -43,7 +43,7 @@ def main():
 					img1 = Image.open('orig.jpg')
 					img2 = Image.open('update.jpg')
 
-					print "Captured Images"
+					print ("Captured Images")
 
 					toSend = img2.resize((400, 400), Image.ANTIALIAS)
 					toSend.save('latest.png')
@@ -61,8 +61,8 @@ def main():
 					diff = Image.open("diff.jpg").convert('1')
 					black, white = diff.getcolors()
 
-					print black[0] #number of black pixels
-					print white[0] #number of white pixels
+					print (black[0]) #number of black pixels)
+					print (white[0]) #number of white pixels)
 					if (white[0] < 3500):
 						print "relatively empty"
 					elif (white[0] <5000):
