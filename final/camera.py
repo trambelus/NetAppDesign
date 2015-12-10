@@ -23,11 +23,11 @@ def main():
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.bind((ip, TCP_PORT))
 			s.listen(1)
+			(conn, addr) = s.accept()
 			#testing
 			#put all in a while loop, always wait for a signal to take another photo and process again
 			while (1):
 				print('Infinite while')
-				(conn, addr) = s.accept()
 				recv_data = ord(conn.recv(1))
 				print (recv_data)
 				if (recv_data == 0):
@@ -69,7 +69,7 @@ def main():
 						print ("full")
 					conn.send(chr(0))
 					print("sent data back")
-				conn.close()
+				#conn.close()
 	except KeyboardInterrupt:
 		s.close() # Close socket connection
 
