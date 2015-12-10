@@ -9,6 +9,7 @@ import socket
 import time
 import RPi.GPIO as GPIO
 import sys
+import requests
 
 # GPIO pin number of LED according to spec; GPIO pin 17 Phys Pin 11
 LED = 11
@@ -30,10 +31,11 @@ def main():
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		resp = requests.get('http://jenna.xen.prgmr.com:5281/pissh/pull?id=%s' % pi_id)
-		if resp == '':
+		ip = resp.text
+		if ip == '':
 			return
 		else:
-			s.connect(resp, TCP_PORT)
+			s.connect((ip, TCP_PORT))
 			while True:
 				# not sure where to place this yet
 				# conn, addr = s.accept()

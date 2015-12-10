@@ -1,13 +1,13 @@
-from PIL import Image, ImageFilter
+#!/usr/bin/env python3
+from PIL import Image, ImageFilter, ImageChops
+from imgurpython import ImgurClient
 import picamera
-from PIL import ImageChops
 import math, operator
 import time
 import socket
 import requests
-from imgurpython import ImgurClient
 
-TCP_IP = requests.get('http://jenna.xen.prgrmr.com:5281/pissh/pull?id=camera_pi')
+TCP_IP = requests.get('http://jenna.xen.prgmr.com:5281/pissh/pull?id=camera_pi')
 TCP_PORT = 45678
 camera = picamera.PiCamera()
 #testing
