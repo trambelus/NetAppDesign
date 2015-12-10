@@ -46,7 +46,7 @@ def display():
 	return results_html
 
 def main():
-	app.run(host='0.0.0.0', port=80)
+	app.run(host='0.0.0.0', port=80, debug=True)
 	app.add_url_rule('/favicon.ico', redirect_to=url_for('static', filename='favicon.ico'))
 
 if __name__ == '__main__':
