@@ -5,7 +5,7 @@ from pprint import pprint
 import hashlib
 import sqlite3
 
-app = Flask(__name__, static_folder='.')
+app = Flask(__name__, static_folder='..')
 app.secret_key = 'vOaZrSbR8ZIpCAeU'
 
 def init_db():
