@@ -18,27 +18,26 @@
 <form action="/rooms" method="GET">
     <input type="submit" value="Go Back">
 </form>
-</div>
-</center>
 
 { % if room % }
-<script>
-if (text == 'SEB') {
-	document.getElementById('place').innerHTML = 'Room 115 in the SEB';
-	document.getElementById('information').innerHTML = 'Currently, classroom 115 in the SEB is XX% full';
+    <script>
+	if (text == 'SEB') {
+	    document.getElementById('place').innerHTML = 'Room 115 in the SEB';
+	    document.getElementById('information').innerHTML = 'Currently, classroom 115 in the SEB is XX% full';
 
-}
-else {
-	var image = document.getElementById('roomImage')
-		image.parentNode.removeChild(image);
-		document.getElementById('place').innerHTML = 'Sorry, there is currently no data for the selected room';
-		var info = document.getElementById('information')
-		info.parentNode.removeChild(info);
 	}
-}
-
-</script>
+	else {
+	    var image = document.getElementById('roomImage')
+	    image.parentNode.removeChild(image);
+	    document.getElementById('place').innerHTML = 'Sorry, there is currently no data for the selected room';
+	    var info = document.getElementById('information')
+	    info.parentNode.removeChild(info);
+	}
+    </script>
 { % endif % }
+
+</div>
+</center>
 
 </body>
 </html>
