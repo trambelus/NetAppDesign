@@ -36,9 +36,8 @@ def main():
 			return
 		else:
 			print(ip)
-			#s.connect((ip, TCP_PORT))
+			s.connect((ip, TCP_PORT))
 			while True:
-				s.connect((ip, TCP_PORT))
 				# not sure where to place this yet
 				# conn, addr = s.accept()
 				break_beam = GPIO.input(LED)
@@ -53,7 +52,6 @@ def main():
 					print(led_off)
 					time.sleep(10) # was 60
 					s.send(bytes(chr(led_off), 'UTF-8'))  # Send ACK to Camera Pi
-					s.close()
 	except KeyboardInterrupt:
 			GPIO.cleanup()
 			s.close() # Close socket connection
