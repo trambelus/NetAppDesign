@@ -64,11 +64,11 @@ def main():
 					print (black[0]) #number of black pixels)
 					print (white[0]) #number of white pixels)
 					if (white[0] < 3500):
-						print "relatively empty"
+						print ("relatively empty")
 					elif (white[0] <5000):
-						print "kind of full"
+						print ("kind of full")
 					else:
-						print "full"
+						print ("full")
 				conn.close()
 	except KeyboardInterrupt:
 		s.close() # Close socket connection
