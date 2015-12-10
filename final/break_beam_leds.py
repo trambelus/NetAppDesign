@@ -9,6 +9,7 @@ import socket
 import time
 import RPi.GPIO as GPIO
 import sys
+import requests
 
 # GPIO pin number of LED according to spec; GPIO pin 17 Phys Pin 11
 LED = 11
