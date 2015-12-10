@@ -22,14 +22,14 @@ def upload():
 
 @app.route('/rooms/validate', methods=['GET','POST'])
 def validate():
-	print(request)
-	pprint(request.form)
 	if request.method == 'POST':
 		with open('hash.txt','r') as f:
 			hash_s = f.readlines()[0]
+		print('Stored hash: %s' % hash_s)
 
 		hash_f = hashlib.new('sha256')
 		hash_f.update(bytes(request.form['password'],'UTF-8'))
+		print('given hash: %s' % hash_f.hex_digest())
 		if hash_f.hex_digest() != hash_s:
 			return render_template('index.html',error='Invalid password')
 
