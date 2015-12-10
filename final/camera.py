@@ -27,10 +27,10 @@ def main():
 			s.listen(1)
 			#testing
 			#put all in a while loop, always wait for a signal to take another photo and process again
-			conn, addr) = s.accept()
 			while (1):
 				print('Infinite while')
-				recv_data = ord(conn.recv(1))
+				(conn, addr) = s.accept()
+				recv_data = conn.recv(1024)
 				print recv_data
 				if (recv_data == 0):
 					print "Received Signal"
