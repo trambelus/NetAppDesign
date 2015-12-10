@@ -25,13 +25,9 @@ def validate():
 	if request.method == 'POST':
 		with open('hash.txt','r') as f:
 			hash_s = f.readlines()[0]
-		print('Stored hash: %s' % hash_s)
-		print('Given password: %s' % request.form['password'])
-		print('Type: %s' % str(type(request.form['password'])))
 		hash_f = hashlib.new('sha256')
 		hash_f.update(bytes(request.form['password'],'UTF-8'))
-		print('given hash: %s' % hash_f.hex_digest())
-		if hash_f.hex_digest() != hash_s:
+		if hash_f.hexdigest() != hash_s:
 			return render_template('index.html',error='Invalid password')
 
 		flash('Authentication successful')
@@ -46,8 +42,8 @@ def display():
 	return results_html
 
 def main():
-	app.run(host='0.0.0.0', port=80, debug=True)
 	app.add_url_rule('/favicon.ico', redirect_to=url_for('static', filename='favicon.ico'))
+	app.run(host='0.0.0.0', port=80, debug=True)
 
 if __name__ == '__main__':
 	main()
