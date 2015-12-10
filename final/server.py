@@ -3,15 +3,21 @@
 from flask import Flask, request, flash, redirect,  render_template
 from pprint import pprint
 import hashlib
+import sqlite3
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='.')
 app.secret_key = 'vOaZrSbR8ZIpCAeU'
+
+def init_db():
+	db = sqlite3.connect('main.db3')
+	db.execute('CREATE TABLE IF NOT EXISTS tables')
 
 @app.route('/rooms/upload', methods=['GET','POST'])
 def upload():
 	if request.method == 'POST':
 		f = request.files['file']
 		f.save('/img/latest.png')
+		return ''
 
 @app.route('/rooms', methods=['GET','POST'])
 def rooms():
