@@ -48,7 +48,7 @@ def main():
 				else:
 					print('LED beam is broken')
 					send_data = 0
-					time.sleep(60)
+					time.sleep(10) # was 60
 					s.send(bytes(chr(led_off), 'UTF-8'))  # Send ACK to Camera Pi
 	except KeyboardInterrupt:
 			GPIO.cleanup()
