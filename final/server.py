@@ -4,8 +4,6 @@ from flask import Flask, request, flash, redirect, url_for
 from pprint import pprint
 import hashlib
 
-app = Flask(__name__)
-
 @app.route('/rooms')
 def rooms():
 	with open('index.html') as f:
@@ -36,8 +34,9 @@ def display():
 	return results_html
 
 def main():
-	app.add_url_rule('/favicon.ico', redirect_to=url_for('static', filename='favicon.ico'))
+	app = Flask(__name__)
 	app.run(host='0.0.0.0', port=80)
+	app.add_url_rule('/favicon.ico', redirect_to=url_for('static', filename='favicon.ico'))
 
 if __name__ == '__main__':
 	main()
