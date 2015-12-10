@@ -5,6 +5,8 @@ import math, operator
 import time
 import socket
 import requests
+from imgurpython import ImgurClient
+
 TCP_IP = requests.get('http://jenna.xen.prgrmr.com:5281/pissh/pull?id=camera_pi')
 TCP_PORT = 45678
 camera = picamera.PiCamera()
@@ -26,6 +28,9 @@ while (1):
 		img1 = Image.open('orig.jpg')
 		img2 = Image.open('update.jpg')
 		toSend = img2.resize((400, 400), Image.ANTIALIAS)
+		toSend.save('latest.png')
+		files = {'file': ('latest.png', open('latest.png','rb'), {'Expires': '0', 'Auth':'8spWsLd38ji08Tpc'})}
+		rsp = requests.post('http://trambel.us/rooms/upload', files=files)
 
 		img1 = img1.filter(ImageFilter.FIND_EDGES)
 		img1.save('orig.jpg')
@@ -47,3 +52,4 @@ while (1):
 			print "kind of full"
 		else:
 			print "full"
+
