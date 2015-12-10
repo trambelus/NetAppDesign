@@ -18,16 +18,17 @@ def upload():
 		f = request.files['latest.png']
 		f.save('/img/latest.png')
 
-@app.route('/rooms/validate', methods=['POST'])
+@app.route('/rooms/validate', methods=['GET','POST'])
 def validate():
-	with open('hash.txt','r') as f:
-		hash_s = f.readlines()[0]
-	hash_f = hashlib.new('sha256')
-	hash_f.update(bytes(request.form['password'],'UTF-8'))
-	if hash_f.hex_digest() != hash_s:
-		abort(401)
-	flash('Authentication successful')
-	return redirect(url_for('/rooms/display'))
+	if request.method == 'POST':
+		with open('hash.txt','r') as f:
+			hash_s = f.readlines()[0]
+		hash_f = hashlib.new('sha256')
+		hash_f.update(bytes(request.form['password'],'UTF-8'))
+		if hash_f.hex_digest() != hash_s:
+			abort(401)
+		flash('Authentication successful')
+		return redirect(url_for('/rooms/display'))
 
 @app.route('/rooms/display', methods=['GET'])
 def display():
