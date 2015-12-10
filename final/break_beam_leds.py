@@ -16,13 +16,13 @@ LED = 11
 
 # TCP_IP = '192.168.0.12'
 # TCP_IP = '0.0.0.0'
-TCP_PORT = 45678
+TCP_PORT = 45679
 BUFFER_SIZE = 1
 pi_id = 'camera_pi'
 led_on = 1
 led_off = 0
 
-# Setup GPIO as output
+# Setup GPIO as input
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(LED, GPIO.IN)
 
