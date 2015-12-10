@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request, flash, redirect,  render_template
+from flask import Flask, request, flash, redirect,  render_template, url_for
 from pprint import pprint
 import hashlib
 import sqlite3
@@ -10,7 +10,18 @@ app.secret_key = 'vOaZrSbR8ZIpCAeU'
 
 def init_db():
 	db = sqlite3.connect('main.db3')
-	db.execute('CREATE TABLE IF NOT EXISTS tables')
+	db.execute("""CREATE TABLE IF NOT EXISTS tables (
+		id INT NOT NULL PRIMARY KEY UNIQUE AUTOINCREMENT,
+		fullname TEXT NOT NULL,
+		fullness TEXT NOT NULL,
+		imgpath TEXT NOT NULL,
+		lastupdated DATE NOT NULL
+	);""")
+	return db
+
+@app.route('/')
+def main():
+	return "<img src='%s'></img>" % url_for('main.png')
 
 @app.route('/rooms/upload', methods=['GET','POST'])
 def upload():
