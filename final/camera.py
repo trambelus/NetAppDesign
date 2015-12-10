@@ -67,7 +67,7 @@ def main():
 						print ("kind of full")
 					else:
 						print ("full")
-					connect.send(chr(0))
+					conn.send(chr(0))
 					print("sent data back")
 				conn.close()
 	except KeyboardInterrupt:
