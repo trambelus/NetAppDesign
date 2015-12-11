@@ -38,13 +38,13 @@ def upload():
 			filename = '%s_%s.png' % (id, time.strftime('%Y%m%d%H%M%S'))
 			recv_file.save('static/%s' % filename)
 			#query = "REPLACE INTO rooms (id, fullname, status, imgpath, lastupdated) VALUES (?,?,?,?,?)"
-			query = "UPDATE rooms SET filename='%s' WHERE id='%s'" % (id, filename)
+			query = "UPDATE rooms SET imgpath='%s' WHERE id='%s'" % (id, filename)
 			db.execute(query)
 
 		if 'status' in request.form:
 			print('Updating status')
 			status = request.form['status']
-			query = "UPDATE rooms SET filename='%s' WHERE id='%s'" % (id, status)
+			query = "UPDATE rooms SET status='%s' WHERE id='%s'" % (id, status)
 			db.execute(query)
 
 		lastupdated = time.strftime('%Y-%m-%d %H:%M:%S UTC')
