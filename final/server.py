@@ -67,7 +67,7 @@ def rooms():
 		flash('Authentication successful')
 		db = init_db()
 		id = '00000'
-		data = db.execute("SELECT * FROM rooms WHERE id = '%s'" % id).fetchall()[0]
+		data = db.execute("SELECT * FROM rooms WHERE id = '%s'" % id).fetchall()
 		status = data[2]
 		filename = data[3]
 		lastupdated = data[4]
