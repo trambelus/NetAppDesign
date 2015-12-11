@@ -7,8 +7,6 @@ import sqlite3
 import time
 import shelve
 
-places = {'00000':'Design Studio'}
-
 app = Flask(__name__)
 app.secret_key = 'vOaZrSbR8ZIpCAeU'
 
@@ -29,6 +27,7 @@ def upload():
 			recv_file = request.files['file']
 			filename = 'latest.png'
 			recv_file.save('static/%s' % filename)
+			print("\tAuth: %s" % request.headers['Auth'])
 
 		if 'status' in request.form:
 			global status
