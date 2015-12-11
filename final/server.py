@@ -50,6 +50,7 @@ def upload():
 		lastupdated = time.strftime('%Y-%m-%d %H:%M:%S UTC')
 		query = "UPDATE ROOMS SET lastupdated='%s' WHERE id='%s'" % (id, lastupdated)
 		db.execute(query)
+		db.commit()
 		db.close()
 
 		return ''
