@@ -71,7 +71,7 @@ def main():
 
 					files = {'file': ('latest.png', open('latest.png','rb'), {'Expires': '0', 'Auth':'8spWsLd38ji08Tpc'})}
 					myData = {'status': status}
-					rsp = requests.post('http://trambel.us/rooms/upload', files=files, data=status)
+					rsp = requests.post('http://trambel.us/rooms/upload', files=files, data=myData)
 
 
 					conn.send(chr(0))
