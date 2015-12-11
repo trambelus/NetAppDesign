@@ -11,7 +11,11 @@
 
 <p id="place">Room XXX in XXX hall</p>
 
+{% if filename %}
+<img src="{{ url_for('static',filename=filename)}}" id="roomImage" alt="Image of Classroom" width="400" height="400"/>
+{% else %}
 <img src="{{ url_for('static',filename='latest.png')}}" id="roomImage" alt="Image of Classroom" width="400" height="400"/>
+{% endif %}
 
 <p id="information">Currently, classroom XXX in building XXX is XX% full</p>
 
