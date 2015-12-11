@@ -26,18 +26,9 @@
 
 {% if status %}
     <script>
-	if (room == 'SEB') {
-	    document.getElementById('place').innerHTML = 'Design Studio in Whittemore Hall';
+
 	    document.getElementById('information').innerHTML = 'Currently, the design studio is' + status;
 
-	}
-	else {
-	    var image = document.getElementById('roomImage')
-	    image.parentNode.removeChild(image);
-	    document.getElementById('place').innerHTML = 'Sorry, there is currently no data for the selected room';
-	    var info = document.getElementById('information')
-	    info.parentNode.removeChild(info);
-	}
     </script>
 {% endif %}
 
