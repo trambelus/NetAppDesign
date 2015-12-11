@@ -18,19 +18,17 @@
 <img src="{{ url_for('static',filename='latest.png')}}" id="roomImage" alt="Image of Classroom" width="400" height="400"/>
 {% endif %}
 
-<p id="information">Currently, classroom XXX in building XXX is XX% full</p>
+{% if status %}
+
+		<p id="information">Currently, the Design Studio in Whittemore Hall is {{ status }}</p>
+
+{% endif %}
 
 <form action="/rooms" method="GET">
     <input type="submit" value="Go Back">
 </form>
 
-{% if status %}
-    <script>
 
-	    document.getElementById('information').innerHTML = 'Currently, the design studio is' + status;
-
-    </script>
-{% endif %}
 
 </div>
 </center>
