@@ -69,9 +69,9 @@ def main():
 						status = "full"
 					print status
 
-					myData = status + "|Design Studio|5"
 					files = {'file': ('latest.png', open('latest.png','rb'), {'Expires': '0', 'Auth':'8spWsLd38ji08Tpc'})}
-					rsp = requests.post('http://trambel.us/rooms/upload', files=files, data=myData)
+					myData = {'status': status}
+					rsp = requests.post('http://trambel.us/rooms/upload', files=files, data=status)
 
 
 					conn.send(chr(0))
