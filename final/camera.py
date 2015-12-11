@@ -69,9 +69,10 @@ def main():
 						status = "full"
 					print status
 
-					files = {'file': ('latest.png', open('latest.png','rb'), {'Expires': '0', 'Auth':'8spWsLd38ji08Tpc'})}
+					files = {'file': ('latest.png', open('latest.png','rb'))}
+					headers = {'Auth':'8spWsLd38ji08Tpc'}
 					myData = {'status': status}
-					rsp = requests.post('http://trambel.us/rooms/upload', files=files, data=myData)
+					rsp = requests.post('http://trambel.us/rooms/upload', files=files, data=myData, headers=headers)
 
 
 					conn.send(chr(0))

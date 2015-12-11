@@ -24,11 +24,14 @@ def upload():
 		id = '00000'
 
 		if 'file' in request.files:
-			recv_file = request.files['file']
-			filename = 'latest.png'
-			recv_file.save('static/%s' % filename)
-			print("\tkeys: %s" % str(list(request.headers.keys())))
-			print("\tAuth: %s" % request.headers['Auth'])
+			try:
+				if request.headers['Auth'] == '8spWsLd38ji08Tpc':
+					recv_file = request.files['file']
+					filename = 'latest.png'
+					recv_file.save('static/%s' % filename)
+			except KeyError:
+				#return "Auth header field required"
+				abort(401)
 
 		if 'status' in request.form:
 			global status
