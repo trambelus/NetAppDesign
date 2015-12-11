@@ -4,6 +4,9 @@ from flask import Flask, request, flash, redirect,  render_template, url_for
 from pprint import pprint
 import hashlib
 import sqlite3
+import time
+
+places = {'00000':'Design Studio'}
 
 app = Flask(__name__)
 app.secret_key = 'vOaZrSbR8ZIpCAeU'
@@ -13,7 +16,7 @@ def init_db():
 	db.execute("""CREATE TABLE IF NOT EXISTS rooms (
 		id INTEGER UNIQUE NOT NULL PRIMARY KEY,
 		fullname TEXT NOT NULL,
-		fullness TEXT NOT NULL,
+		status TEXT NOT NULL,
 		imgpath TEXT NOT NULL,
 		lastupdated DATE NOT NULL
 	);""")
@@ -26,10 +29,18 @@ def main():
 @app.route('/rooms/upload', methods=['GET','POST'])
 def upload():
 	if request.method == 'POST':
+		recv_file = request.files['file']
+		recv_file.save('static/latest.png')
+		status = request.form['status']
+
+		lastupdated = time.strftime('%Y-%m-%d %H:%M:%S UTC')
+		id = '00000'
+		filename = '%s_%s.png' % (id, time.strftime('%Y%m%d%H%M%S'))
+		query = "REPLACE INTO rooms (id, fullname, status, imgpath, lastupdated) VALUES (?,?,?,?,?)"
+
 		db = init_db()
-		f = request.files['file']
-		f.save('static/latest.png')
-		query = "REPLACE INTO rooms (id, fullname, fullness, imgpath, lastupdated) VALUES (?,?,?,?,?)"
+		db.execute(query, (id, places[id], status, filename, lastupdated))
+
 		return ''
 
 @app.route('/rooms', methods=['GET','POST'])
@@ -43,7 +54,13 @@ def rooms():
 			return render_template('index.html',error='Invalid password')
 
 		flash('Authentication successful')
-		return render_template('results.html', room=request.form['room'])
+		db = init_db()
+		id = '00000'
+		data = db.execute("SELECT * FROM rooms WHERE id = '%s'" % id).fetchall()[0]
+		status = data[2]
+		filename = data[3]
+		lastupdated = data[4]
+		return render_template('results.html', status=status, filename=filename, lastupdated=lastupdated)
 
 	return render_template('index.html')
 
