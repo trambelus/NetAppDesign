@@ -29,17 +29,28 @@ def main():
 @app.route('/rooms/upload', methods=['GET','POST'])
 def upload():
 	if request.method == 'POST':
-		recv_file = request.files['file']
-		recv_file.save('static/latest.png')
-		status = request.form['status']
+		id = '00000'
+		db = init_db()
+
+		if 'file' in request.files:
+			print('Updating file')
+			recv_file = request.files['file']
+			filename = '%s_%s.png' % (id, time.strftime('%Y%m%d%H%M%S'))
+			recv_file.save('static/%s' % filename)
+			#query = "REPLACE INTO rooms (id, fullname, status, imgpath, lastupdated) VALUES (?,?,?,?,?)"
+			query = "UPDATE rooms SET filename='%s' WHERE id='%s'" % (id, filename)
+			db.execute(query)
+
+		if 'status' in request.form:
+			print('Updating status')
+			status = request.form['status']
+			query = "UPDATE rooms SET filename='%s' WHERE id='%s'" % (id, status)
+			db.execute(query)
 
 		lastupdated = time.strftime('%Y-%m-%d %H:%M:%S UTC')
-		id = '00000'
-		filename = '%s_%s.png' % (id, time.strftime('%Y%m%d%H%M%S'))
-		query = "REPLACE INTO rooms (id, fullname, status, imgpath, lastupdated) VALUES (?,?,?,?,?)"
-
-		db = init_db()
-		db.execute(query, (id, places[id], status, filename, lastupdated))
+		query = "UPDATE ROOMS SET lastupdated='%s' WHERE id='%s'" % (id, lastupdated)
+		db.execute(query)
+		db.close()
 
 		return ''
 
