@@ -5,22 +5,15 @@ from pprint import pprint
 import hashlib
 import sqlite3
 import time
+import shelve
 
 places = {'00000':'Design Studio'}
 
 app = Flask(__name__)
 app.secret_key = 'vOaZrSbR8ZIpCAeU'
 
-def init_db():
-	db = sqlite3.connect('main.db3')
-	db.execute("""CREATE TABLE IF NOT EXISTS rooms (
-		id INTEGER UNIQUE NOT NULL PRIMARY KEY,
-		fullname TEXT NOT NULL,
-		status TEXT NOT NULL,
-		imgpath TEXT NOT NULL,
-		lastupdated DATE NOT NULL
-	);""")
-	return db
+shelf = shelve.Shelf('data')
+# status, lastupdated
 
 @app.route('/')
 def main():
@@ -30,28 +23,18 @@ def main():
 def upload():
 	if request.method == 'POST':
 		id = '00000'
-		db = init_db()
 
 		if 'file' in request.files:
-			print('Updating file')
 			recv_file = request.files['file']
-			filename = '%s_%s.png' % (id, time.strftime('%Y%m%d%H%M%S'))
+			filename = 'latest.png'
 			recv_file.save('static/%s' % filename)
-			#query = "REPLACE INTO rooms (id, fullname, status, imgpath, lastupdated) VALUES (?,?,?,?,?)"
-			query = "UPDATE rooms SET imgpath='%s' WHERE id='%s'" % (id, filename)
-			db.execute(query)
 
 		if 'status' in request.form:
-			print('Updating status')
 			status = request.form['status']
-			query = "UPDATE rooms SET status='%s' WHERE id='%s'" % (id, status)
-			db.execute(query)
+			shelf['status'] = status
 
 		lastupdated = time.strftime('%Y-%m-%d %H:%M:%S UTC')
-		query = "UPDATE ROOMS SET lastupdated='%s' WHERE id='%s'" % (id, lastupdated)
-		db.execute(query)
-		db.commit()
-		db.close()
+		shelf['lastupdated'] = lastupdated
 
 		return ''
 
@@ -66,15 +49,11 @@ def rooms():
 			return render_template('index.html',error='Invalid password')
 
 		flash('Authentication successful')
-		db = init_db()
-		id = '00000'
-		data = db.execute("SELECT * FROM rooms WHERE id = '%s'" % id).fetchall()
-		db.close()
-		if data:
-			status = data[2]
-			filename = data[3]
-			lastupdated = data[4]
-			return render_template('results.html', status=status, filename=filename, lastupdated=lastupdated)
+
+		if 'lastupdated' in shelf and 'status' in shelf:
+			status = shelf['status']
+			lastupdated = shelf['lastupdated']
+			return render_template('results.html', status=status, lastupdated=lastupdated)
 		else:
 			return render_template('results.html')
 
