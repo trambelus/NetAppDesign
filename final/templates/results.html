@@ -10,7 +10,7 @@
 <h1><font color="maroon">Results for your selected room are posted below!</font></h1>
 
 <p id="place">Design Studio in Whittemore</p>
-<p id="lastupdated"><i>Last updated: {{ lastupdated }}</i></p>
+{% if lastupdated %}<p id="lastupdated"><i>Last updated: {{ lastupdated }}</i></p>{% endif %}
 
 {% if filename %}
 <img src="{{ url_for('static',filename=filename)}}" id="roomImage" alt="Image of Classroom" width="400" height="400"/>

@@ -50,7 +50,7 @@ def rooms():
 			return render_template('index.html',error='Invalid password')
 
 		flash('Authentication successful')
-
+		print('\t\tstatus="%s", lastupdated="%s"' % (status,lastupdated))
 		return render_template('results.html', status=status, lastupdated=lastupdated)
 
 	return render_template('index.html')
