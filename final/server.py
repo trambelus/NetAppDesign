@@ -39,6 +39,9 @@ def upload():
 			global status
 			status = request.form['status']
 
+		if 'file' not in request.files and 'status' not in request.form:
+			abort(400)
+
 		global lastupdated
 		lastupdated = time.strftime('%Y-%m-%d %H:%M:%S UTC')
 
