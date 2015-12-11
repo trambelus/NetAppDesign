@@ -23,11 +23,11 @@
     <input type="submit" value="Go Back">
 </form>
 
-{% if room %}
+{% if status %}
     <script>
 	if (room == 'SEB') {
-	    document.getElementById('place').innerHTML = 'Room 115 in the SEB';
-	    document.getElementById('information').innerHTML = 'Currently, classroom 115 in the SEB is XX% full';
+	    document.getElementById('place').innerHTML = 'Design Studio in Whittemore Hall';
+	    document.getElementById('information').innerHTML = 'Currently, the design studio is' + status;
 
 	}
 	else {
