@@ -50,12 +50,9 @@ def rooms():
 
 		flash('Authentication successful')
 
-		if 'lastupdated' in shelf and 'status' in shelf:
-			status = shelf['status']
-			lastupdated = shelf['lastupdated']
-			return render_template('results.html', status=status, lastupdated=lastupdated)
-		else:
-			return render_template('results.html')
+		status = shelf['status']
+		lastupdated = shelf['lastupdated']
+		return render_template('results.html', status=status, lastupdated=lastupdated)
 
 	return render_template('index.html')
 
