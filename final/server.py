@@ -51,6 +51,10 @@ def upload():
 
 	return '<h1>ಠ_ಠ</h1>'
 
+@app.route('/favicon.ico')
+def favicon():
+	return url_for('static',filename='favicon.ico')
+
 @app.route('/rooms', methods=['GET','POST'])
 def rooms():
 	if request.method == 'POST':
