@@ -12,7 +12,8 @@ places = {'00000':'Design Studio'}
 app = Flask(__name__)
 app.secret_key = 'vOaZrSbR8ZIpCAeU'
 
-shelf = shelve.Shelf('data')
+status = ''
+lastupdated = ''
 # status, lastupdated
 
 @app.route('/')
@@ -30,11 +31,11 @@ def upload():
 			recv_file.save('static/%s' % filename)
 
 		if 'status' in request.form:
+			global status
 			status = request.form['status']
-			shelf['status'] = status
 
+		global lastupdated
 		lastupdated = time.strftime('%Y-%m-%d %H:%M:%S UTC')
-		shelf['lastupdated'] = lastupdated
 
 		return ''
 
@@ -50,8 +51,6 @@ def rooms():
 
 		flash('Authentication successful')
 
-		status = shelf['status']
-		lastupdated = shelf['lastupdated']
 		return render_template('results.html', status=status, lastupdated=lastupdated)
 
 	return render_template('index.html')
