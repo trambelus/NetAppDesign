@@ -27,7 +27,7 @@ def upload():
 			recv_file = request.files['file']
 			filename = 'latest.png'
 			recv_file.save('static/%s' % filename)
-			print("\tkeys: %s" % str(request.headers.keys()))
+			print("\tkeys: %s" % str(list(request.headers.keys())))
 			print("\tAuth: %s" % request.headers['Auth'])
 
 		if 'status' in request.form:
@@ -53,8 +53,8 @@ def rooms():
 
 		flash('Authentication successful')
 		print('\t\tstatus="%s", lastupdated="%s"' % (status,lastupdated))
-		lu = time.strftime('%Y%m%d%H%M%S')
-		return render_template('results.html', status=status, lastupdated=lastupdated, filename='latest.png', lu=lu)
+		ct = time.strftime('%Y%m%d%H%M%S')
+		return render_template('results.html', status=status, lastupdated=lastupdated, filename='latest.png', ct=ct)
 
 	return render_template('index.html')
 

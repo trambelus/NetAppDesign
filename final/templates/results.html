@@ -13,7 +13,7 @@
 {% if lastupdated %}<p id="lastupdated"><i>Last updated: {{ lastupdated }}</i></p>{% endif %}
 
 {% if filename %}
-<img src="{{ url_for('static',filename=filename)+'?'+lu}}" id="roomImage" alt="Image of Classroom" width="400" height="400"/>
+<img src="{{ url_for('static',filename=filename)+'?'+ct}}" id="roomImage" alt="Image of Classroom" width="400" height="400"/>
 {% else %}
 <img src="{{ url_for('static',filename='latest.png')}}" id="roomImage" alt="Image of Classroom" width="400" height="400"/>
 {% endif %}
