@@ -11,7 +11,7 @@ app.secret_key = 'vOaZrSbR8ZIpCAeU'
 def init_db():
 	db = sqlite3.connect('main.db3')
 	db.execute("""CREATE TABLE IF NOT EXISTS rooms (
-		id INT NOT NULL PRIMARY KEY UNIQUE AUTOINCREMENT,
+		id INTEGER UNIQUE NOT NULL PRIMARY KEY,
 		fullname TEXT NOT NULL,
 		fullness TEXT NOT NULL,
 		imgpath TEXT NOT NULL,
