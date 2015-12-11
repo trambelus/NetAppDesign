@@ -39,6 +39,8 @@ def upload():
 
 		return ''
 
+	return '<h1>ಠ_ಠ</h1>'
+
 @app.route('/rooms', methods=['GET','POST'])
 def rooms():
 	if request.method == 'POST':
