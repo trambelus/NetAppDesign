@@ -61,9 +61,9 @@ def main():
 					print (black[0]) #number of black pixels)
 					print (white[0]) #number of white pixels)
 					status = ""
-					if (white[0] < 3500):
+					if (white[0] < 3000):
 						status = "relatively empty"
-					elif (white[0] <8000):
+					elif (white[0] <5000):
 						status = "kind of full"
 					else:
 						status = "full"
