@@ -68,6 +68,7 @@ def rooms():
 		db = init_db()
 		id = '00000'
 		data = db.execute("SELECT * FROM rooms WHERE id = '%s'" % id).fetchall()
+		print('\t\tDATA:%s' % str(data))
 		status = data[2]
 		filename = data[3]
 		lastupdated = data[4]
