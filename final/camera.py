@@ -35,7 +35,7 @@ def main():
 					print ("Received Signal")
 					camera.capture('dump.jpg')
 					time.sleep(3)
-					camera.capture('orig.jpg') #"empty room"
+					camera.capture('orig.jpg') 
 					time.sleep(3)
 					camera.capture('update.jpg') #capture new image whenever there is a change
 
@@ -46,8 +46,6 @@ def main():
 
 					toSend = img2.resize((400, 400), Image.ANTIALIAS)
 					toSend.save('latest.png')
-					files = {'file': ('latest.png', open('latest.png','rb'), {'Expires': '0', 'Auth':'8spWsLd38ji08Tpc'})}
-					rsp = requests.post('http://trambel.us/rooms/upload', files=files)
 
 					img1 = img1.filter(ImageFilter.FIND_EDGES)
 					img1.save('orig.jpg')
@@ -62,15 +60,22 @@ def main():
 
 					print (black[0]) #number of black pixels)
 					print (white[0]) #number of white pixels)
+					status = ""
 					if (white[0] < 3500):
-						print ("relatively empty")
-					elif (white[0] <5000):
-						print ("kind of full")
+						status = "relatively empty"
+					elif (white[0] <8000):
+						status = "kind of full"
 					else:
-						print ("full")
+						status = "full"
+					print status
+
+					myData = status + "|Design Studio|5"
+					files = {'file': ('latest.png', open('latest.png','rb'), {'Expires': '0', 'Auth':'8spWsLd38ji08Tpc'})}
+					rsp = requests.post('http://trambel.us/rooms/upload', files=files, data=myData)
+
+
 					conn.send(chr(0))
 					print("sent data back")
-				#conn.close()
 	except KeyboardInterrupt:
 		s.close() # Close socket connection
 
