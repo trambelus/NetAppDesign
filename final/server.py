@@ -54,7 +54,7 @@ def rooms():
 		flash('Authentication successful')
 		print('\t\tstatus="%s", lastupdated="%s"' % (status,lastupdated))
 		lu = time.strftime('%Y%m%d%H%M%S')
-		return render_template('results.html', status=status, lastupdated=lastupdated, filename='latest.png?%s'%lu)
+		return render_template('results.html', status=status, lastupdated=lastupdated, filename='latest.png', lu=lu)
 
 	return render_template('index.html')
 
