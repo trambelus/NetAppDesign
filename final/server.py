@@ -10,7 +10,7 @@ app.secret_key = 'vOaZrSbR8ZIpCAeU'
 
 def init_db():
 	db = sqlite3.connect('main.db3')
-	db.execute("""CREATE TABLE IF NOT EXISTS tables (
+	db.execute("""CREATE TABLE IF NOT EXISTS rooms (
 		id INT NOT NULL PRIMARY KEY UNIQUE AUTOINCREMENT,
 		fullname TEXT NOT NULL,
 		fullness TEXT NOT NULL,
@@ -21,13 +21,15 @@ def init_db():
 
 @app.route('/')
 def main():
-	return "<img src='%s'></img>" % url_for('main.png')
+	return "<img src='%s'></img>" % url_for('static',filename='main.png')
 
 @app.route('/rooms/upload', methods=['GET','POST'])
 def upload():
 	if request.method == 'POST':
+		db = init_db()
 		f = request.files['file']
-		f.save('latest.png')
+		f.save('static/latest.png')
+		query = "REPLACE INTO rooms (id, fullname, fullness, imgpath, lastupdated) VALUES (?,?,?,?,?)"
 		return ''
 
 @app.route('/rooms', methods=['GET','POST'])
