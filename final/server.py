@@ -68,11 +68,14 @@ def rooms():
 		db = init_db()
 		id = '00000'
 		data = db.execute("SELECT * FROM rooms WHERE id = '%s'" % id).fetchall()
-		print('\t\tDATA:%s' % str(data))
-		status = data[2]
-		filename = data[3]
-		lastupdated = data[4]
-		return render_template('results.html', status=status, filename=filename, lastupdated=lastupdated)
+		db.close()
+		if data:
+			status = data[2]
+			filename = data[3]
+			lastupdated = data[4]
+			return render_template('results.html', status=status, filename=filename, lastupdated=lastupdated)
+		else:
+			return render_template('results.html')
 
 	return render_template('index.html')
 
