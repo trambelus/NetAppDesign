@@ -29,6 +29,8 @@ def upload():
 					recv_file = request.files['file']
 					filename = 'latest.png'
 					recv_file.save('static/%s' % filename)
+				else:
+					abort(401)
 			except KeyError:
 				#return "Auth header field required"
 				abort(401)
