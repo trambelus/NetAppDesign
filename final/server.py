@@ -12,6 +12,7 @@ app.secret_key = 'vOaZrSbR8ZIpCAeU'
 
 status = ''
 lastupdated = ''
+lu = ''
 # status, lastupdated
 
 @app.route('/')
@@ -43,8 +44,9 @@ def upload():
 			abort(400)
 
 		global lastupdated
+		global lu
 		lastupdated = time.strftime('%Y-%m-%d %H:%M:%S UTC')
-
+		lu = time.strftime('%Y%m%d%H%M%S')
 		return ''
 
 	return '<h1>ಠ_ಠ</h1>'
@@ -61,8 +63,7 @@ def rooms():
 
 		flash('Authentication successful')
 		print('\t\tstatus="%s", lastupdated="%s"' % (status,lastupdated))
-		ct = time.strftime('%Y%m%d%H%M%S')
-		return render_template('results.html', status=status, lastupdated=lastupdated, filename='latest.png', ct=ct)
+		return render_template('results.html', status=status, lastupdated=lastupdated, filename='latest.png', ct=lu)
 
 	return render_template('index.html')
 
