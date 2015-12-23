@@ -23,7 +23,7 @@ def main():
 
 case "$1" in
 	start)
-		sleep 5
+		sleep 10
 		ipaddr=$(ifconfig wlan0 | awk '/inet addr/{{print substr($2,6)}}')
 		echo "PiSSH: Sending IP $ipaddr to server"
 		wget "http://jenna.xen.prgmr.com:5281/pissh/push?ip=$ipaddr&id={0}" -O /dev/null &>/dev/null
